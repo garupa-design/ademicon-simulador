@@ -1767,3 +1767,29 @@ html.checkout-ativo .mobile-container {
 .conclusao-baixar:hover {
     background-color: #F0F0F0;
 }
+
+/* === Moldura de celular no desktop ===
+   Espelha a logica do max-width: 480px — so vale em tela grande.
+   As condicoes de largura E altura garantem que nenhum celular entre
+   aqui (o maior iPhone tem 932px de altura em CSS), preservando la o
+   scroll do documento, que e o que faz a barra do navegador recolher. */
+@media (min-width: 481px) and (min-height: 941px) {
+    body {
+        align-items: center;
+    }
+
+    .mobile-container {
+        height: 940px;
+        min-height: 0;
+        max-height: 940px;
+        overflow-y: auto;
+        border-radius: 12px;
+    }
+
+    /* No checkout o container e fixed: centraliza nos dois eixos */
+    html.checkout-ativo .mobile-container {
+        top: 50%;
+        height: 940px;
+        transform: translate(-50%, -50%);
+    }
+}
