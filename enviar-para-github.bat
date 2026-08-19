@@ -11,8 +11,8 @@ where git >nul 2>nul
 if errorlevel 1 goto :semgit
 
 rem === Identidade ===
-rem Fora de blocos if(): dentro deles o %VAR% e expandido cedo demais
-rem e o git recebe valor vazio.
+rem Tudo fora de blocos if(): dentro deles o %VAR% e expandido cedo
+rem demais e o git acaba recebendo valor vazio.
 git config --global user.name >nul 2>nul
 if not errorlevel 1 goto :temnome
 echo.
@@ -39,57 +39,79 @@ git branch -M main
 :temrepo
 
 rem === Endereco remoto ===
-git remote get-url origin >nul 2>nul
-if not errorlevel 1 goto :temremoto
+rem Le a URL de verdade: um "origin" pode existir apontando para o vazio.
+set REMOTO=
+for /f "delims=" %%i in ('git remote get-url origin 2^>nul') do set REMOTO=%%i
+if defined REMOTO goto :temremoto
+
 echo.
 echo   Cole o endereco do seu repositorio no GitHub.
 echo   Exemplo: https://github.com/seu-usuario/ademicon-simulador.git
 echo.
 set /p URL="  URL: "
+if not defined URL goto :semurl
+git remote remove origin >nul 2>nul
 git remote add origin "%URL%"
+set REMOTO=%URL%
 :temremoto
 
+echo   Repositorio: %REMOTO%
+
+rem === Commit ===
 echo.
 echo   Preparando os arquivos...
 git add .
 
 git diff --cached --quiet
-if not errorlevel 1 goto :semmudanca
+if errorlevel 1 goto :temmudanca
+echo   Nenhum arquivo novo desde o ultimo commit.
+goto :enviar
 
+:temmudanca
 echo.
 set /p MSG="  Descreva o que mudou (Enter para 'Atualiza o simulador'): "
 if not defined MSG set MSG=Atualiza o simulador
 git commit -m "%MSG%"
 if errorlevel 1 goto :commitfalhou
-goto :enviar
-
-:semmudanca
-rem Sem mudancas agora, mas pode haver commits ainda nao enviados
-git log origin/main..HEAD --oneline >nul 2>nul
-echo   Nada mudou desde o ultimo commit. Tentando enviar o que houver...
 
 :enviar
+rem Sem nenhum commit nao ha o que enviar
+git rev-parse HEAD >nul 2>nul
+if errorlevel 1 goto :semcommit
+
 echo.
 echo   Enviando... (pode abrir o navegador para voce entrar no GitHub)
 git push -u origin main
 if errorlevel 1 goto :pushfalhou
 
 echo.
-echo   Pronto. Os arquivos estao no GitHub.
+echo   Pronto. Os arquivos estao em:
+echo   %REMOTO%
+goto :fim
+
+:semurl
+echo.
+echo   Nenhuma URL informada. Rode de novo e cole o endereco.
+goto :fim
+
+:semcommit
+echo.
+echo   Nao existe nenhum commit neste repositorio, entao nao ha o que enviar.
+echo   Rode o arquivo de novo e confira se o commit foi feito.
 goto :fim
 
 :commitfalhou
 echo.
-echo   O commit falhou - veja a mensagem do git acima.
-echo   Sem commit nao ha o que enviar.
+echo   O commit falhou - veja a mensagem do git logo acima.
 goto :fim
 
 :pushfalhou
 echo.
-echo   O envio falhou. Veja a mensagem do git acima:
+echo   O envio falhou. Compare com a mensagem do git acima:
 echo.
-echo   - "src refspec main does not match any"
-echo       Nao existe nenhum commit. Provavelmente o commit falhou antes.
+echo   - "does not appear to be a git repository"
+echo       A URL do repositorio esta errada ou vazia. Corrija com:
+echo           git remote set-url origin URL_DO_SEU_REPOSITORIO
 echo.
 echo   - "Updates were rejected" ou "fetch first"
 echo       O repositorio no GitHub ja tem arquivos. Rode:
@@ -97,7 +119,7 @@ echo           git pull --rebase origin main
 echo           git push -u origin main
 echo.
 echo   - "Repository not found" ou pedido de login
-echo       Confira a URL e se voce entrou na conta certa do GitHub.
+echo       Confira se voce tem acesso e se entrou na conta certa.
 echo.
 goto :fim
 
