@@ -1,3 +1,6 @@
+# Pasta de descarte — nao vai para o repositorio
+deletar/
+
 # Dependencias — reinstalaveis com "npm install", nao vao para o repositorio
 node_modules/
 
