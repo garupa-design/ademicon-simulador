@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#FFFFFF">
+    <title>Ademicon - Simulador e Checkout</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="mobile-container">
+        <!-- === Header === -->
+        <header class="top-navbar" id="globalHeader">
+            <button type="button" class="icon-button" aria-label="Menu" id="logoAdemicon">
+                <img src="assets/menu.svg" alt="Menu" style="width: 20px; height: 20px;">
+            </button>
+            <img src="assets/logo.svg" alt="Ademicon" class="logo">
+            <div style="width: 36px;"></div>
+        </header>
+
+        <header class="top-navbar" id="step4Header" style="display: none;">
+            <button type="button" class="icon-button" aria-label="Voltar" id="btnBackToStep3">
+                <img src="assets/icon-arrow-left.svg" alt="Voltar">
+            </button>
+            <span style="font-size: 16px; font-weight: 700; color: var(--color-text-dark);">Checkout</span>
+            <div style="width: 36px;"></div>
+        </header>
+
+        <main class="main-content" id="step1">
+            <!-- Banner -->
+            <div class="banner">
+                <div class="banner-gradient"></div>
+                <h1 class="banner-title">Consórcio é compra planejada, segura, sem juros e sem entrada</h1>
+            </div>
+
+            <!-- Simulador Container (sobreposto ao banner) -->
+            <div class="simulator-wrapper">
+                <div class="simulator-card">
+                    <h2 class="simulator-title">Simule seu <span class="text-primary">consórcio</span></h2>
+                    
+                    <form class="simulator-form" id="simuladorForm">
+                        <!-- Campo Produto -->
+                        <div class="form-group" style="position: relative;">
+                            <label class="form-label">Produto</label>
+                            <div class="input-wrapper" id="produtoSelectBtn">
+                                <div class="input-content">
+                                    <img src="assets/icon-home.svg" alt="" class="input-icon" id="produtoIcon">
+                                    <span class="input-text" id="produtoText">Imóvel</span>
+                                </div>
+                                <img src="assets/icon-chevron-down.svg" alt="" class="input-icon" id="produtoChevron">
+                            </div>
+                            <!-- Dropdown customizado -->
+                            <ul class="custom-dropdown" id="produtoDropdown" style="display: none;">
+                                <li data-value="imovel" data-icon="assets/icon-home.svg">
+                                    <img src="assets/icon-home.svg" alt="" class="input-icon"> Imóvel
+                                </li>
+                                <li data-value="veiculo" data-icon="assets/icon-vehicle.svg">
+                                    <img src="assets/icon-vehicle.svg" alt="" class="input-icon"> Veículo
+                                </li>
+                                <li data-value="servico" data-icon="assets/icon-services.svg">
+                                    <img src="assets/icon-services.svg" alt="" class="input-icon"> Serviço
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- Seletor Crédito/Parcela -->
+                        <div class="form-group">
+                            <label class="form-label">Selecione</label>
+                            <div class="toggle-group">
+                                <button type="button" class="toggle-btn toggle-btn-active" id="btnCredito">Crédito</button>
+                                <button type="button" class="toggle-btn toggle-btn-inactive" id="btnParcela">Parcela</button>
+                            </div>
+                        </div>
+
+                        <!-- Campo Valor -->
+                        <div class="form-group">
+                            <label class="form-label" id="labelValor">Valor do crédito</label>
+                            <div class="input-wrapper">
+                                <div class="input-content" style="width: 100%;">
+                                    <input type="text" class="input-field" id="inputValor" placeholder="R$ 100.000,00">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botão Simular -->
+                        <button type="button" class="btn-primary" id="btnSimular">Simular</button>
+                    </form>
+                </div>
+            </div>
+        </main>
+
+        <!-- Etapa 2: Dados Pessoais -->
+        <main class="main-content step2-content" id="step2" style="display: none;">
+            <div class="step2-form-container">
+                <h2 class="step2-title">Conte mais sobre você</h2>
+                
+                <form class="step2-form">
+                    <!-- Campos -->
+                    <div class="form-group">
+                        <label class="form-label">Nome</label>
+                        <div class="input-wrapper">
+                            <input type="text" class="input-field" placeholder="Ex: João Carlos" enterkeyhint="next">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">E-mail</label>
+                        <div class="input-wrapper">
+                            <input type="email" class="input-field" placeholder="Ex: joao@email.com" enterkeyhint="next">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">CPF</label>
+                        <div class="input-wrapper">
+                            <input type="text" class="input-field" id="cpf" placeholder="000.000.000-00" maxlength="14" enterkeyhint="next">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Telefone</label>
+                        <div class="input-wrapper">
+                            <input type="tel" class="input-field" id="telefone" placeholder="(00) 00000-0000" maxlength="15" enterkeyhint="done">
+                        </div>
+                    </div>
+
+                    <!-- Cards Informativos -->
+                    <div class="info-card">
+                        <img src="assets/info-loan.png" alt="" class="info-card-img">
+                        <div class="info-card-content">
+                            <h4 class="info-card-title">Consórcio não é Empréstimo!</h4>
+                            <p class="info-card-text">Crédito disponível após a contemplação por sorteio, lance ou fim do prazo do grupo.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <img src="assets/info-security.png" alt="" class="info-card-img">
+                        <div class="info-card-content">
+                            <h4 class="info-card-title">Seus dados estão seguros.</h4>
+                            <p class="info-card-text">Seus dados estão seguros com a gente. Todo o processo é protegido e segue as normas de privacidade.</p>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Rodapé com Checkboxes -->
+            <div class="step2-footer">
+                <div class="checkbox-group">
+                    <label class="custom-checkbox">
+                        <input type="checkbox" checked>
+                        <span class="checkmark"><img src="assets/icon-check.svg" alt=""></span>
+                        <span class="checkbox-label">Quero receber informações sobre a minha simulação</span>
+                    </label>
+                    <label class="custom-checkbox">
+                        <input type="checkbox">
+                        <span class="checkmark"><img src="assets/icon-check.svg" alt=""></span>
+                        <span class="checkbox-label">Quero receber novidades e promoções</span>
+                    </label>
+                </div>
+                <button type="button" class="btn-primary btn-disabled" id="btnProximaEtapa">Próxima Etapa</button>
+            </div>
+        </main>
+
+        <!-- Etapa 3: Propostas -->
+        <main class="main-content step3-content" id="step3" style="display: none; background-color: var(--color-bg-main);">
+            <!-- Header Resultado -->
+            <div class="step3-header">
+                <h2 class="step3-title" id="resultadoTitle">João, este é o resultado da sua simulação para imóvel</h2>
+            </div>
+
+            <!-- Opções -->
+            <div class="planos-container">
+                <!-- Card 1 (Recomendado) -->
+                <div class="plano-card plano-card-selected">
+                    <h3 class="plano-title">Opção 1 <span class="badge-recomendado">Recomendado</span></h3>
+                    
+                    <div class="plano-info-row">
+                        <span class="plano-label">Valor do crédito:</span>
+                        <span class="plano-value-primary">R$ 500.000</span>
+                    </div>
+                    
+                    <hr class="plano-divider">
+                    
+                    <div class="plano-grid">
+                        <div class="plano-grid-item">
+                            <span class="plano-label">Prazo do plano:</span>
+                            <span class="plano-value">196 meses</span>
+                        </div>
+                        <div class="plano-grid-item">
+                            <span class="plano-label">Taxa ADM:</span>
+                            <div style="display: flex; align-items: center; gap: 4px;">
+                                <span class="plano-value">2% ao mês</span>
+                                <div class="icon-help-wrapper" data-modal="taxaAdm">
+                                    <img src="assets/icon-help.svg" alt="?">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="plano-parcela-section">
+                        <span class="plano-label">Valor da parcela</span>
+                        <div class="plano-price-wrapper">
+                            <span class="plano-price-old">R$ 25.000</span>
+                            <span class="plano-price-new">R$ 12.500</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+                            <div class="badge-reduzida">Parcela Reduzida 50%</div>
+                            <div class="icon-help-wrapper" data-modal="parcelaReduzida">
+                                <img src="assets/icon-help.svg" alt="?">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="plano-card">
+                    <h3 class="plano-title">Opção 2</h3>
+                    
+                    <div class="plano-info-row">
+                        <span class="plano-label">Valor do crédito:</span>
+                        <span class="plano-value-primary">R$ 500.000</span>
+                    </div>
+                    
+                    <hr class="plano-divider">
+                    
+                    <div class="plano-grid">
+                        <div class="plano-grid-item">
+                            <span class="plano-label">Prazo do plano:</span>
+                            <span class="plano-value">196 meses</span>
+                        </div>
+                        <div class="plano-grid-item">
+                            <span class="plano-label">Taxa ADM:</span>
+                            <span class="plano-value">24.00%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="plano-parcela-section">
+                        <div class="badge-fixa">PARCELA FIXA</div>
+                        <span class="plano-label">Valor da parcela</span>
+                        <span class="plano-price-normal">R$ 25.500</span>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="plano-card">
+                    <h3 class="plano-title">Opção 3</h3>
+                    
+                    <div class="plano-info-row">
+                        <span class="plano-label">Valor do crédito:</span>
+                        <span class="plano-value-primary">R$ 500.000</span>
+                    </div>
+                    
+                    <hr class="plano-divider">
+                    
+                    <div class="plano-grid">
+                        <div class="plano-grid-item">
+                            <span class="plano-label">Prazo do plano:</span>
+                            <span class="plano-value">196 meses</span>
+                        </div>
+                        <div class="plano-grid-item">
+                            <span class="plano-label">Taxa ADM:</span>
+                            <span class="plano-value">24.00%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="plano-parcela-section">
+                        <span class="plano-label">Valor da parcela</span>
+                        <span class="plano-price-normal">R$ 25.000</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Botoes -->
+            <div class="step3-footer">
+                <button type="button" class="btn-primary" id="btnEspecialista">Procure um especialista</button>
+                <button type="button" class="btn-secondary" id="btnContratar">Contratar 100% digital</button>
+            </div>
+        </main>
+        <!-- Etapa 4: Especialista -->
+        <main id="step4" class="main-content" style="display: none; background-color: var(--color-bg-white);">
+            <div class="step4-content">
+                <div class="step4-intro">
+                    <h2 class="step4-title">Procure um especialista</h2>
+                    <p class="step4-desc">São 300 lojas localizadas em 24 Estados e o Distrito Federal. Encontre a Ademicon mais próxima e entre em contato para solicitar a contratação.</p>
+                </div>
+                
+                <!-- Breadcrumb Card (Hidden initially) -->
+                <div id="breadcrumbCard" class="step4-enderecos" style="display: none; flex: none; padding: 16px 24px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <img src="assets/icon-arrow-left.svg" id="breadcrumbBack" style="cursor: pointer; display: none;">
+                            <h3 id="breadcrumbTitle" style="font-size: 16px; font-weight: 500; color: #525252; margin: 0;">Paraná</h3>
+                        </div>
+                        <img src="assets/icon-close.svg" alt="Fechar" id="breadcrumbClose" style="cursor: pointer; width: 24px; height: 24px;">
+                    </div>
+                </div>
+
+                <!-- Main Card (Search & List OR Map details) -->
+                <div id="mainSearchCard" class="step4-enderecos">
+                    <h3 id="enderecosTitle" style="margin: 0;">Selecione o Estado</h3>
+                    <div class="search-wrapper" id="searchWrapper">
+                        <img src="assets/icon-search.svg" alt="Buscar">
+                        <input type="text" id="searchInput" placeholder="Buscar">
+                    </div>
+                    
+                    <div class="enderecos-list" id="enderecosList">
+                        <!-- Itens renderizados dinamicamente pelo JS -->
+                    </div>
+
+                    <!-- Map View -->
+                    <div id="mapView" style="display: none; flex-direction: column; gap: 16px;">
+                        <div>
+                            <h3 id="mapTitle" style="font-size: 20px; font-weight: 600; color: #262626; margin: 0;">Ahú</h3>
+                            <p id="mapAddress" style="font-size: 14px; color: #525252; margin-top: 8px; line-height: 20px;">Endereço aqui</p>
+                            <p id="mapPhone" style="font-size: 20px; font-weight: 600; color: #262626; margin-top: 16px;">(00) 0000-0000</p>
+                        </div>
+                        <div id="mapImageContainer" style="width: 100%; height: 300px; background-color: #E5E5E5; border-radius: 8px; overflow: hidden; background-image: url('assets/map-image.png'); background-size: cover; background-position: center;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Modais Info -->
+        <div id="infoModal" class="full-modal" style="display: none;">
+            <div class="full-modal-header">
+                <h2 id="infoModalTitle">Título</h2>
+                <div class="icon-close-wrapper" id="closeModalBtn">
+                    <img src="assets/icon-close.svg" alt="Fechar">
+                </div>
+            </div>
+            <div class="full-modal-body">
+                <p id="infoModalText">Texto do modal</p>
+            </div>
+            <div class="full-modal-footer">
+                <button type="button" class="btn-secondary" id="btnEntendi">Entendi!</button>
+            </div>
+        </div>
+
+    <!-- Checkout Header -->
+    <header class="top-navbar" id="checkoutHeader" style="display: none;">
+        <button type="button" class="icon-button" aria-label="Voltar" id="btnBackToStep3FromCheckout">
+            <img src="assets/icon-arrow-left.svg" alt="Voltar">
+        </button>
+        <span style="font-size: 16px; font-weight: 700; color: #525252;">Checkout</span>
+        <div style="width: 36px;"></div>
+    </header>
+
+    <!-- Checkout Step 1 - contem todas as etapas de Dados Pessoais -->
+    <main id="checkoutStep1" class="checkout-tela" style="display: none;">
+
+        <!-- Rola entre o header e o botao -->
+        <div class="checkout-rolagem">
+            <div class="checkout-topo">
+                <div class="progresso">
+                    <span class="progresso-texto" id="progressoTexto">Passo 1 de 3: Dados Pessoais</span>
+                    <div class="progresso-trilho">
+                        <div class="progresso-preenchido" id="progressoBarra"></div>
+                    </div>
+                </div>
+
+            <!-- Accordion: Detalhes (espelha o card de proposta da Etapa 3) -->
+            <div id="checkoutAccordion" class="checkout-accordion">
+                <div class="checkout-accordion-header">
+                    <span class="checkout-accordion-title" id="checkoutAccordionTitle">Opção 1: Crédito <strong>R$&nbsp;500.000</strong></span>
+                    <img src="assets/icon-chevron-down.svg" class="checkout-accordion-icon" id="checkoutAccordionIcon" alt="">
+                </div>
+
+                <div id="checkoutAccordionContent" class="checkout-accordion-content">
+                    <div class="plano-info-row">
+                        <span class="plano-label">Valor do crédito:</span>
+                        <span class="plano-value-primary">R$ 500.000</span>
+                    </div>
+
+                    <hr class="plano-divider">
+
+                    <div class="plano-grid">
+                        <div class="plano-grid-item">
+                            <span class="plano-label">Prazo do plano:</span>
+                            <span class="plano-value">196 meses</span>
+                        </div>
+                        <div class="plano-grid-item">
+                            <span class="plano-label">Taxa ADM:</span>
+                            <div style="display: flex; align-items: center; gap: 4px;">
+                                <span class="plano-value">2% ao mês</span>
+                                <div class="icon-help-wrapper" data-modal="taxaAdm">
+                                    <img src="assets/icon-help.svg" alt="Sobre a taxa ADM">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="plano-parcela-section">
+                        <span class="plano-label">Valor da parcela</span>
+                        <div class="plano-price-wrapper">
+                            <span class="plano-price-old">R$ 25.000</span>
+                            <span class="plano-price-new">R$ 12.500</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+                            <div class="badge-reduzida">Parcela Reduzida 50%</div>
+                            <div class="icon-help-wrapper" data-modal="parcelaReduzida">
+                                <img src="assets/icon-help.svg" alt="Sobre a parcela reduzida">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="checkout-accordion-actions">
+                        <button type="button" class="btn-duvidas" id="btnAccordionUnidade">Dúvidas? Procure uma unidade</button>
+                        <button type="button" class="btn-outra-proposta" id="btnAccordionPropostas">Escolher outra proposta</button>
+                    </div>
+                </div>
+            </div>
+            </div>
+
+            <div class="checkout-conteudo">
+            <!-- 1. CPF -->
+            <section class="checkout-etapa etapa-ativa" data-etapa="cpf">
+                <h2 class="checkout-titulo">Ótima escolha!<br>Vamos iniciar seu contrato.</h2>
+                <div class="checkout-campo">
+                    <h3 class="checkout-label">Confirme seu CPF</h3>
+                    <div class="input-wrapper">
+                        <input type="text" class="input-field" id="checkoutCpf" data-autofoco placeholder="000.000.000-00" inputmode="numeric" maxlength="14" enterkeyhint="next">
+                    </div>
+                    <div class="info-card" style="margin-top: 0;">
+                        <img src="assets/info-security.png" alt="" class="info-card-img">
+                        <div class="info-card-content">
+                            <h4 class="info-card-title">Seus dados estão seguros.</h4>
+                            <p class="info-card-text">Seus dados estão seguros com a gente. Todo o processo é protegido e segue as normas de privacidade.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. Data de nascimento -->
+            <section class="checkout-etapa" data-etapa="nascimento">
+                <h2 class="checkout-titulo">Vamos precisar de mais alguns dados.</h2>
+                <div class="checkout-campo">
+                    <h3 class="checkout-label">Sua data de nascimento</h3>
+                    <div class="input-wrapper">
+                        <input type="text" class="input-field" id="checkoutNascimento" data-autofoco placeholder="dd/mm/aaaa" inputmode="numeric" maxlength="10" enterkeyhint="next">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Seu gênero -->
+            <section class="checkout-etapa" data-etapa="genero">
+                <h2 class="checkout-titulo">Vamos precisar de mais alguns dados.</h2>
+                <div class="checkout-campo">
+                    <h3 class="checkout-label">Seu gênero</h3>
+                    <div class="radio-lista">
+                        <label class="radio-opcao">
+                            <input type="radio" name="genero" value="Feminino">
+                            <span class="radio-marca"></span>
+                            <span class="radio-texto">Feminino</span>
+                        </label>
+                        <label class="radio-opcao">
+                            <input type="radio" name="genero" value="Masculino">
+                            <span class="radio-marca"></span>
+                            <span class="radio-texto">Masculino</span>
+                        </label>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Seu estado civil -->
+            <section class="checkout-etapa" data-etapa="estadoCivil">
+                <h2 class="checkout-titulo">Vamos precisar de mais alguns dados.</h2>
+                <div class="checkout-campo">
+                    <h3 class="checkout-label">Seu estado civil</h3>
+                    <div class="radio-lista">
+                        <label class="radio-opcao">
+                            <input type="radio" name="estadoCivil" value="Solteiro">
+                            <span class="radio-marca"></span>
+                            <span class="radio-texto">Solteiro</span>
+                        </label>
+                        <label class="radio-opcao">
+                            <input type="radio" name="estadoCivil" value="Casado">
+                            <span class="radio-marca"></span>
+                            <span class="radio-texto">Casado</span>
+                        </label>
+                        <label class="radio-opcao">
+                            <input type="radio" name="estadoCivil" value="Divorciado">
+                            <span class="radio-marca"></span>
+                            <span class="radio-texto">Divorciado</span>
+                        </label>
+                        <label class="radio-opcao">
+                            <input type="radio" name="estadoCivil" value="Viúvo">
+                            <span class="radio-marca"></span>
+                            <span class="radio-texto">Viúvo</span>
+                        </label>
+                        <label class="radio-opcao">
+                            <input type="radio" name="estadoCivil" value="Outro">
+                            <span class="radio-marca"></span>
+                            <span class="radio-texto">Outro</span>
+                        </label>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sua faixa de renda familiar -->
+            <section class="checkout-etapa" data-etapa="renda">
+                <h2 class="checkout-titulo">Vamos precisar de mais alguns dados.</h2>
+                <div class="checkout-campo">
+                    <h3 class="checkout-label">Sua faixa de renda familiar</h3>
+                    <div class="radio-lista">
+                        <label class="radio-opcao">
+                            <input type="radio" name="renda" value="Até R$ 5.000">
+                            <span class="radio-marca"></span>
+                            <span class="radio-texto">Até R$ 5.000</span>
+                        </label>
+                        <label class="radio-opcao">
+                            <input type="radio" name="renda" value="R$ 5.000 até R$ 10.000">
+                            <span class="radio-marca"></span>
+                            <span class="radio-texto">R$ 5.000 até R$ 10.000</span>
+                        </label>
+                        <label class="radio-opcao">
+                            <input type="radio" name="renda" value="R$ 10.000 até R$ 20.000">
+                            <span class="radio-marca"></span>
+                            <span class="radio-texto">R$ 10.000 até R$ 20.000</span>
+                        </label>
+                        <label class="radio-opcao">
+                            <input type="radio" name="renda" value="R$ 20.000 até R$ 30.000">
+                            <span class="radio-marca"></span>
+                            <span class="radio-texto">R$ 20.000 até R$ 30.000</span>
+                        </label>
+                        <label class="radio-opcao">
+                            <input type="radio" name="renda" value="Mais de R$ 30.000">
+                            <span class="radio-marca"></span>
+                            <span class="radio-texto">Mais de R$ 30.000</span>
+                        </label>
+                    </div>
+                    <p class="checkout-aviso">No momento da alienação do bem, o titular deverá comprovar renda suficiente para o pagamento da parcela, mantendo, no mínimo, 30% de margem disponível.</p>
+                </div>
+            </section>
+
+            <!-- 6. Profissao -->
+            <section class="checkout-etapa" data-etapa="profissao" data-requer-selecao>
+                <h2 class="checkout-titulo">Vamos precisar de mais alguns dados.</h2>
+                <div class="checkout-campo">
+                    <h3 class="checkout-label">Qual é a sua profissão?</h3>
+
+                    <div class="search-wrapper">
+                        <img src="assets/icon-search.svg" alt="">
+                        <input type="text" id="filtroProfissao" placeholder="Buscar profissão" autocomplete="off" enterkeyhint="search">
+                    </div>
+
+                    <div class="radio-lista" id="listaProfissoes"></div>
+                    <p class="lista-vazia" id="profissaoVazia" hidden>Nenhuma profissão encontrada com esse termo.</p>
+                </div>
+            </section>
+
+            <!-- 7. CEP -->
+            <section class="checkout-etapa" data-etapa="cep" data-rotulo="Passo 1 de 3: Endereço">
+                <h2 class="checkout-titulo">Agora vamos cadastrar seu endereço.</h2>
+                <div class="checkout-campo">
+                    <h3 class="checkout-label">Digite seu CEP</h3>
+                    <div class="input-wrapper">
+                        <input type="text" class="input-field" id="checkoutCep" data-autofoco placeholder="00000-000" inputmode="numeric" maxlength="9" enterkeyhint="next">
+                    </div>
+                    <p class="campo-erro" id="cepErro" hidden></p>
+                </div>
+            </section>
+
+            <!-- 8. Numero -->
+            <section class="checkout-etapa" data-etapa="numero" data-rotulo="Passo 1 de 3: Endereço">
+                <h2 class="checkout-titulo">Encontramos seu CEP</h2>
+                <div class="checkout-campo">
+                    <p class="endereco-resumo" id="resumoNumero"></p>
+                    <h3 class="checkout-label">Qual o número?</h3>
+                    <div class="input-wrapper">
+                        <input type="text" class="input-field" id="checkoutNumero" data-autofoco placeholder="Digite o número da residência" inputmode="numeric" maxlength="10" enterkeyhint="next">
+                    </div>
+                </div>
+            </section>
+
+            <!-- 9. Complemento -->
+            <section class="checkout-etapa" data-etapa="complemento" data-rotulo="Passo 1 de 3: Endereço">
+                <h2 class="checkout-titulo">Agora vamos cadastrar seu endereço.</h2>
+                <div class="checkout-campo">
+                    <p class="endereco-resumo" id="resumoComplemento"></p>
+                    <h3 class="checkout-label">Qual o complemento?</h3>
+                    <div class="input-wrapper">
+                        <input type="text" class="input-field" id="checkoutComplemento" data-autofoco placeholder="Digite o número do complemento" maxlength="40" enterkeyhint="done">
+                    </div>
+                    <label class="checkbox-linha">
+                        <input type="checkbox" id="semComplemento">
+                        <span class="checkbox-marca"></span>
+                        <span class="checkbox-texto">Não possui complemento</span>
+                    </label>
+                </div>
+            </section>
+
+            <!-- 10. Revisao -->
+            <section class="checkout-etapa" data-etapa="revisao" data-rotulo="Passo 2 de 3: Revise seus dados" data-botao="Ir para o pagamento">
+                <div class="revisao-cabecalho">
+                    <h2 class="checkout-titulo">Revise seus dados</h2>
+                    <p class="revisao-dica">Toque para editar</p>
+                </div>
+
+                <div class="revisao-lista" id="revisaoLista"></div>
+
+                <div class="info-card" style="margin-top: 0;">
+                    <img src="assets/info-loan.png" alt="" class="info-card-img">
+                    <div class="info-card-content">
+                        <h4 class="info-card-title">Consórcio não é Empréstimo!</h4>
+                        <p class="info-card-text">Crédito disponível após a contemplação por sorteio, lance ou fim do prazo do grupo.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 11. Pagamento -->
+            <section class="checkout-etapa" data-etapa="pagamento" data-rotulo="Passo 3 de 3: Pagamento" data-requer-selecao>
+                <h2 class="checkout-titulo">Pague a primeira parcela para confirmar a contratação.</h2>
+                <div class="checkout-campo">
+                    <h3 class="checkout-label">Selecione o método de pagamento.</h3>
+                    <div class="radio-lista">
+                        <label class="radio-opcao">
+                            <input type="radio" name="pagamento" value="PIX" data-botao="Gerar código PIX" checked>
+                            <span class="radio-marca"></span>
+                            <span class="radio-texto">PIX</span>
+                        </label>
+                        <label class="radio-opcao">
+                            <input type="radio" name="pagamento" value="Cartão de Crédito" data-botao="Pagar com cartão">
+                            <span class="radio-marca"></span>
+                            <span class="radio-texto">Cartão de Crédito</span>
+                        </label>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 12. PIX: QR Code -->
+            <section class="checkout-etapa" data-etapa="pix" data-rotulo="Passo 3 de 3: Pagamento" data-sem-rodape>
+                <div class="pix-titulos">
+                    <h2 class="checkout-titulo">Finalize o pagamento para confirmar sua cota.</h2>
+                    <p class="pix-apoio">Ao pagar, esta página será automaticamente atualizada.</p>
+                </div>
+
+                <div class="pix-card">
+                    <img src="assets/qr-pix.png" alt="QR Code para pagamento via PIX" class="pix-qr" id="pixQr">
+                    <div class="pix-qr-expirado" id="pixQrExpirado" hidden>Código<br>expirado</div>
+
+                    <p class="pix-parcela">Primeira parcela: R$ 1.230,23</p>
+
+                    <button type="button" class="btn-primary pix-acao" id="btnCopiarPix">
+                        <img src="assets/icon-copy.svg" alt="" class="pix-icone">
+                        <span class="pix-acao-texto">Copiar código</span>
+                    </button>
+
+                    <p class="pix-nota">Os boletos das próximas parcelas serão enviados para o seu e-mail.</p>
+                    <button type="button" class="pix-link" id="btnJaPaguei">Já paguei!</button>
+                    <button type="button" class="pix-link" id="btnExpiraEm">Seu código expira em <span id="pixRelogio">01:59:59</span></button>
+                </div>
+
+                <div class="info-card" style="margin-top: 0;">
+                    <img src="assets/info-loan.png" alt="" class="info-card-img">
+                    <div class="info-card-content">
+                        <h4 class="info-card-title">Consórcio não é Empréstimo!</h4>
+                        <p class="info-card-text">Crédito disponível após a contemplação por sorteio, lance ou fim do prazo do grupo.</p>
+                    </div>
+                </div>
+
+                <div class="pix-titulos pix-duvida">
+                    <h2 class="checkout-titulo">Ainda está em dúvida?</h2>
+                    <p class="pix-apoio">Fale com um de nossos especialistas ou solicite uma novo proposta.</p>
+                    <button type="button" class="btn-secondary pix-acao" id="btnPixEspecialista">Procure um Especialista</button>
+                    <button type="button" class="pix-fantasma" id="btnPixPropostas">Rever propostas</button>
+                </div>
+            </section>
+
+            <!-- 13. Conclusao -->
+            <section class="checkout-etapa" data-etapa="conclusao" data-rotulo="Concluído!"
+                     data-sem-rodape data-sem-accordion data-titulo-header="Contratação Concluída">
+
+                <div class="pix-titulos">
+                    <h2 class="checkout-titulo">Pagamento confirmado!</h2>
+                    <p class="pix-apoio">Sua cota está ativa e você já faz parte do grupo.</p>
+                </div>
+
+                <div class="conclusao-identificacao">
+                    <div class="conclusao-numeros">
+                        <div class="conclusao-numero-item">
+                            <span class="conclusao-numero-rotulo">Grupo</span>
+                            <span class="conclusao-numero-valor">005055</span>
+                        </div>
+                        <div class="conclusao-numero-item">
+                            <span class="conclusao-numero-rotulo">Cota</span>
+                            <span class="conclusao-numero-valor">12345678</span>
+                        </div>
+                    </div>
+                    <p class="conclusao-nota">Guarde esses números: é por eles que você acompanha seu consórcio.</p>
+                </div>
+
+                <div class="resumo-consorcio">
+                    <h3 class="resumo-consorcio-titulo">Detalhes do seu consórcio</h3>
+
+                    <div class="plano-info-row">
+                        <span class="plano-label">Valor do crédito:</span>
+                        <span class="plano-value-primary">R$ 500.000</span>
+                    </div>
+
+                    <hr class="plano-divider">
+
+                    <div class="plano-grid">
+                        <div class="plano-grid-item">
+                            <span class="plano-label">Prazo do plano:</span>
+                            <span class="plano-value">196 meses</span>
+                        </div>
+                        <div class="plano-grid-item">
+                            <span class="plano-label">Taxa ADM:</span>
+                            <div style="display: flex; align-items: center; gap: 4px;">
+                                <span class="plano-value">2% ao mês</span>
+                                <div class="icon-help-wrapper" data-modal="taxaAdm">
+                                    <img src="assets/icon-help.svg" alt="Sobre a taxa ADM">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="plano-parcela-section">
+                        <span class="plano-label">Valor da parcela</span>
+                        <div class="plano-price-wrapper">
+                            <span class="plano-price-old">R$ 25.000</span>
+                            <span class="plano-price-new">R$ 12.500</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+                            <div class="badge-reduzida">Parcela Reduzida 50%</div>
+                            <div class="icon-help-wrapper" data-modal="parcelaReduzida">
+                                <img src="assets/icon-help.svg" alt="Sobre a parcela reduzida">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h2 class="checkout-titulo">Próximos Passos</h2>
+
+                <div class="conclusao-passo">
+                    <span class="conclusao-numero">1</span>
+                    <h3 class="conclusao-passo-titulo">Baixe o App</h3>
+                    <p class="conclusao-passo-texto">Acompanhe sua cota, veja as assembleias e ofereça lances direto do celular.</p>
+                    <button type="button" class="btn-secondary pix-acao">Baixar Aplicativo</button>
+                </div>
+
+                <div class="conclusao-passo">
+                    <span class="conclusao-numero">2</span>
+                    <h3 class="conclusao-passo-titulo">Cadastre-se na Área do Cliente</h3>
+                    <p class="conclusao-passo-texto">Pelo site você acessa boletos, extratos e o andamento do seu grupo.</p>
+                    <button type="button" class="btn-secondary pix-acao">Cadastrar na Área do Cliente</button>
+                </div>
+
+                <div class="conclusao-passo">
+                    <span class="conclusao-numero">3</span>
+                    <h3 class="conclusao-passo-titulo">Acompanhe as assembleias</h3>
+                    <p class="conclusao-passo-texto">Toda assembleia é uma chance de ser contemplado, por sorteio ou por lance. Avisamos a data com antecedência e o resultado sai no app e site.</p>
+                    <button type="button" class="btn-secondary pix-acao">Veja a Área de Sorteios e Resultados</button>
+                </div>
+
+                <div class="conclusao-passo">
+                    <span class="conclusao-numero">4</span>
+                    <h3 class="conclusao-passo-titulo">Mantenha as parcelas em dia</h3>
+                    <p class="conclusao-passo-texto">Os boletos chegam no seu e-mail todo mês. Estar em dia é o que garante sua participação nas assembleias.</p>
+                </div>
+
+                <div class="pix-titulos">
+                    <h2 class="checkout-titulo">Baixe seu contrato</h2>
+                    <p class="pix-apoio">Seu contrato já foi gerado. Baixe agora e confira todos os detalhes da sua cota.</p>
+                    <div class="conclusao-arquivo">
+                        <img src="assets/icon-link.svg" alt="" class="conclusao-arquivo-icone">
+                        <span class="conclusao-arquivo-nome">Arquivo PDF</span>
+                        <span class="conclusao-arquivo-peso">2,4mb</span>
+                        <button type="button" class="conclusao-baixar" id="btnBaixarContrato" aria-label="Baixar contrato">
+                            <img src="assets/icon-download.svg" alt="">
+                        </button>
+                    </div>
+                </div>
+
+                <div class="pix-titulos pix-duvida">
+                    <h2 class="checkout-titulo">Ainda está em dúvida?</h2>
+                    <p class="pix-apoio">Fale com um de nossos especialistas ou solicite uma novo proposta.</p>
+                    <button type="button" class="btn-secondary pix-acao" id="btnConclusaoEspecialista">Procure um Especialista</button>
+                    <button type="button" class="pix-fantasma" id="btnConclusaoPropostas">Rever propostas</button>
+                </div>
+            </section>
+            </div>
+        </div>
+
+        <!-- Rodape fixo -->
+        <div class="checkout-rodape">
+            <div class="rodape-checks" id="rodapeChecks" hidden>
+                <label class="checkbox-linha">
+                    <input type="checkbox" id="aceitaTermos">
+                    <span class="checkbox-marca"></span>
+                    <span class="checkbox-texto">Aceito os Termos de Privacidade.</span>
+                </label>
+                <label class="checkbox-linha">
+                    <input type="checkbox" id="aceitaOfertas" checked>
+                    <span class="checkbox-marca"></span>
+                    <span class="checkbox-texto">Quero receber ofertas e novidades.</span>
+                </label>
+            </div>
+            <div class="rodape-acao">
+                <span class="rodape-dica" id="rodapeDica" hidden>Você será redirecionado</span>
+                <button id="btnNextCheckout" class="btn-primary">Próxima etapa</button>
+            </div>
+        </div>
+    </main>
+
+</div>
+    <script src="script.js?v=1787166950658"></script>
+    </body>
+</html>

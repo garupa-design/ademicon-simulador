@@ -1,0 +1,16 @@
+# Dependencias — reinstalaveis com "npm install", nao vao para o repositorio
+node_modules/
+
+# Arquivos temporarios de trabalho
+temp_*
+*.tmp
+*.bak
+
+# Sistema operacional
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Editores
+.vscode/
+.idea/
