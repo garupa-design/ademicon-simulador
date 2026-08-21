@@ -279,7 +279,7 @@ document.addEventListener('DOMContentLoaded', () => { try {
     const modalData = {
         taxaAdm: {
             title: 'Taxa ADM',
-            text: 'A Taxa Administrativa é um valor diluído nas prestações mensais que serve para a gestão dos grupos de consorciados, ela já vem calculada nas parcelas e não é cumulativa. Possui valor fixo pré-estipulado em contrato.\n\nComo é calculada?\n\nA taxa é de 24% ao ano, o que corresponde a 2% ao mês. Este valor é descontado de sua parcela mensal, junto com a contribuição ao fundo comum do grupo.'
+            text: 'A Taxa Administrativa é um valor diluído nas prestações mensais que serve para a gestão dos grupos de consorciados, ela já vem calculada nas parcelas e não é cumulativa. Possui valor fixo pré-estipulado em contrato.\n\nComo é calculada?\n\nA taxa é de 0,12% ao mês, o que equivale a aproximadamente 1,45% ao ano. Este valor é descontado de sua parcela mensal, junto com a contribuição ao fundo comum do grupo.'
         },
         parcelaReduzida: {
             title: 'Parcela reduzida',
