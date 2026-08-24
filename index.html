@@ -77,7 +77,18 @@
                             <label class="form-label" id="labelValor">Valor do crédito</label>
                             <div class="input-wrapper">
                                 <div class="input-content" style="width: 100%;">
-                                    <input type="text" class="input-field" id="inputValor" placeholder="R$ 100.000,00">
+                                    <input type="text" class="input-field" id="inputValor" placeholder="R$ 676.721,15" inputmode="numeric">
+                                </div>
+                            </div>
+
+                            <!-- Slider do valor: anda junto com o campo acima -->
+                            <div class="valor-slider">
+                                <input type="range" class="slider-valor" id="sliderValor"
+                                       min="80000" max="1273442.29" step="any" value="676721.15"
+                                       aria-label="Valor do crédito">
+                                <div class="slider-limites">
+                                    <span id="sliderMin">R$ 80.000,00</span>
+                                    <span id="sliderMax">R$ 1.273.442,29</span>
                                 </div>
                             </div>
                         </div>
@@ -97,10 +108,14 @@
                 <form class="step2-form">
                     <!-- Campos -->
                     <div class="form-group">
-                        <label class="form-label">Nome</label>
-                        <div class="input-wrapper">
-                            <input type="text" class="input-field" placeholder="Ex: João Carlos" enterkeyhint="next">
+                        <label class="form-label" for="nomeCompleto">Nome completo</label>
+                        <div class="input-wrapper" id="nomeWrapper">
+                            <input type="text" class="input-field" id="nomeCompleto" name="nome"
+                                   placeholder="Ex: João Carlos Silva" autocomplete="name"
+                                   autocapitalize="words" enterkeyhint="next"
+                                   aria-describedby="nomeErro">
                         </div>
+                        <p class="campo-erro-msg" id="nomeErro" role="alert" hidden>Por favor, informe seu nome completo</p>
                     </div>
                     <div class="form-group">
                         <label class="form-label">E-mail</label>
@@ -133,8 +148,8 @@
                     <div class="info-card">
                         <img src="assets/info-security.png" alt="" class="info-card-img">
                         <div class="info-card-content">
-                            <h4 class="info-card-title">Seus dados estão seguros.</h4>
-                            <p class="info-card-text">Seus dados estão seguros com a gente. Todo o processo é protegido e segue as normas de privacidade.</p>
+                            <h4 class="info-card-title">Dados seguros pela LGPD</h4>
+                            <p class="info-card-text">Seus dados estão seguros com a gente. Todo o processo é protegido e segue as normas da LGPD.</p>
                         </div>
                     </div>
                 </form>
@@ -227,14 +242,19 @@
                         </div>
                         <div class="plano-grid-item">
                             <span class="plano-label">Taxa ADM:</span>
-                            <span class="plano-value">24.00%</span>
+                            <div style="display: flex; align-items: center; gap: 4px;">
+                                <span class="plano-value">0,12% ao mês</span>
+                                <div class="icon-help-wrapper" data-modal="taxaAdm">
+                                    <img src="assets/icon-help.svg" alt="Sobre a taxa ADM">
+                                </div>
+                            </div>
                         </div>
                     </div>
                     
                     <div class="plano-parcela-section">
-                        <div class="badge-fixa">PARCELA FIXA</div>
                         <span class="plano-label">Valor da parcela</span>
                         <span class="plano-price-normal">R$ 25.500</span>
+                        <div class="badge-fixa">Parcela Fixa</div>
                     </div>
                 </div>
 
@@ -256,7 +276,12 @@
                         </div>
                         <div class="plano-grid-item">
                             <span class="plano-label">Taxa ADM:</span>
-                            <span class="plano-value">24.00%</span>
+                            <div style="display: flex; align-items: center; gap: 4px;">
+                                <span class="plano-value">0,12% ao mês</span>
+                                <div class="icon-help-wrapper" data-modal="taxaAdm">
+                                    <img src="assets/icon-help.svg" alt="Sobre a taxa ADM">
+                                </div>
+                            </div>
                         </div>
                     </div>
                     
@@ -421,8 +446,8 @@
                     <div class="info-card" style="margin-top: 0;">
                         <img src="assets/info-security.png" alt="" class="info-card-img">
                         <div class="info-card-content">
-                            <h4 class="info-card-title">Seus dados estão seguros.</h4>
-                            <p class="info-card-text">Seus dados estão seguros com a gente. Todo o processo é protegido e segue as normas de privacidade.</p>
+                            <h4 class="info-card-title">Dados seguros pela LGPD</h4>
+                            <p class="info-card-text">Seus dados estão seguros com a gente. Todo o processo é protegido e segue as normas da LGPD.</p>
                         </div>
                     </div>
                 </div>
@@ -501,9 +526,14 @@
                     <h3 class="checkout-label">Sua faixa de renda familiar</h3>
                     <div class="radio-lista">
                         <label class="radio-opcao">
-                            <input type="radio" name="renda" value="Até R$ 5.000">
+                            <input type="radio" name="renda" value="Até R$ 3.000">
                             <span class="radio-marca"></span>
-                            <span class="radio-texto">Até R$ 5.000</span>
+                            <span class="radio-texto">Até R$ 3.000</span>
+                        </label>
+                        <label class="radio-opcao">
+                            <input type="radio" name="renda" value="R$ 3.000 até R$ 5.000">
+                            <span class="radio-marca"></span>
+                            <span class="radio-texto">R$ 3.000 até R$ 5.000</span>
                         </label>
                         <label class="radio-opcao">
                             <input type="radio" name="renda" value="R$ 5.000 até R$ 10.000">
@@ -673,6 +703,9 @@
                     <p class="pix-apoio">Sua cota está ativa e você já faz parte do grupo.</p>
                 </div>
 
+                <!-- Os dois cards andam juntos: gap de 16px entre eles,
+                     e nao os 32px que separam os blocos da etapa. -->
+                <div class="conclusao-cartoes">
                 <div class="conclusao-identificacao">
                     <div class="conclusao-numeros">
                         <div class="conclusao-numero-item">
@@ -727,35 +760,7 @@
                         </div>
                     </div>
                 </div>
-
-                <h2 class="checkout-titulo">Próximos Passos</h2>
-
-                <div class="conclusao-passo">
-                    <span class="conclusao-numero">1</span>
-                    <h3 class="conclusao-passo-titulo">Baixe o App</h3>
-                    <p class="conclusao-passo-texto">Acompanhe sua cota, veja as assembleias e ofereça lances direto do celular.</p>
-                    <button type="button" class="btn-secondary pix-acao">Baixar Aplicativo</button>
-                </div>
-
-                <div class="conclusao-passo">
-                    <span class="conclusao-numero">2</span>
-                    <h3 class="conclusao-passo-titulo">Cadastre-se na Área do Cliente</h3>
-                    <p class="conclusao-passo-texto">Pelo site você acessa boletos, extratos e o andamento do seu grupo.</p>
-                    <button type="button" class="btn-secondary pix-acao">Cadastrar na Área do Cliente</button>
-                </div>
-
-                <div class="conclusao-passo">
-                    <span class="conclusao-numero">3</span>
-                    <h3 class="conclusao-passo-titulo">Acompanhe as assembleias</h3>
-                    <p class="conclusao-passo-texto">Toda assembleia é uma chance de ser contemplado, por sorteio ou por lance. Avisamos a data com antecedência e o resultado sai no app e site.</p>
-                    <button type="button" class="btn-secondary pix-acao">Veja a Área de Sorteios e Resultados</button>
-                </div>
-
-                <div class="conclusao-passo">
-                    <span class="conclusao-numero">4</span>
-                    <h3 class="conclusao-passo-titulo">Mantenha as parcelas em dia</h3>
-                    <p class="conclusao-passo-texto">Os boletos chegam no seu e-mail todo mês. Estar em dia é o que garante sua participação nas assembleias.</p>
-                </div>
+                </div><!-- /.conclusao-cartoes -->
 
                 <div class="pix-titulos">
                     <h2 class="checkout-titulo">Baixe seu contrato</h2>
@@ -768,6 +773,53 @@
                             <img src="assets/icon-download.svg" alt="">
                         </button>
                     </div>
+                </div>
+
+                <h2 class="checkout-titulo">Próximos Passos</h2>
+
+                <div class="passos-pilha">
+                    <article class="passo-card">
+                        <div class="passo-conteudo">
+                            <img src="assets/passo-app.png" alt="" class="passo-ilustra">
+                            <div class="passo-texto">
+                                <h3 class="passo-titulo">Baixe o App</h3>
+                                <p class="passo-descricao">Acompanhe sua cota, veja as assembleias e ofereça lances direto do celular.</p>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-secondary pix-acao">Baixar Aplicativo</button>
+                    </article>
+
+                    <article class="passo-card">
+                        <div class="passo-conteudo">
+                            <img src="assets/passo-area-cliente.png" alt="" class="passo-ilustra">
+                            <div class="passo-texto">
+                                <h3 class="passo-titulo">Cadastre-se na Área do Cliente</h3>
+                                <p class="passo-descricao">Cadastre-se na Área do Cliente para acompanhar seu consórcio.</p>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-secondary pix-acao">Cadastrar na Área do Cliente</button>
+                    </article>
+
+                    <article class="passo-card">
+                        <div class="passo-conteudo">
+                            <img src="assets/passo-assembleias.png" alt="" class="passo-ilustra">
+                            <div class="passo-texto">
+                                <h3 class="passo-titulo">Acompanhe as assembleias</h3>
+                                <p class="passo-descricao">A assembleia é a chance de ser contemplado, por sorteio ou por lance.</p>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-secondary pix-acao">Veja a Área de Sorteios e Resultados</button>
+                    </article>
+
+                    <article class="passo-card">
+                        <div class="passo-conteudo">
+                            <img src="assets/passo-parcelas.png" alt="" class="passo-ilustra">
+                            <div class="passo-texto">
+                                <h3 class="passo-titulo">Mantenha as parcelas em dia</h3>
+                                <p class="passo-descricao">Os boletos chegam no seu e-mail todo mês. Esteja em dia para participar das assembleias.</p>
+                            </div>
+                        </div>
+                    </article>
                 </div>
 
                 <div class="pix-titulos pix-duvida">
@@ -802,6 +854,6 @@
     </main>
 
 </div>
-    <script src="script.js?v=1787329331823"></script>
+    <script src="script.js?v=1787584200000"></script>
     </body>
 </html>

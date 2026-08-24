@@ -261,10 +261,34 @@ textarea {
     background-color: var(--color-bg-white);
 }
 
-.input-wrapper:focus-within, 
+.input-wrapper:focus-within,
 .input-wrapper.active-state {
     border: 2px solid #A3A3A3;
     padding: 3px 11px; /* Compensa 1px da borda para o texto não pular */
+}
+
+/* === Estado de erro do campo (Figma 7661:2915) ===
+   Borda #B91C1C sempre que o campo esta em erro; o anel destrutivo
+   so aparece com o campo em foco (variante "Error (Focus)"). */
+.input-wrapper.campo-erro,
+.input-wrapper.campo-erro:focus-within {
+    background-color: var(--color-bg-white);
+    border: 1px solid #B91C1C;
+    padding: 4px 12px;
+}
+
+.input-wrapper.campo-erro:focus-within {
+    box-shadow: 0px 0px 0px 3px rgba(220, 38, 38, 0.2);
+}
+
+.campo-erro-msg {
+    font-size: 14px;
+    line-height: 20px;
+    color: #991B1B;
+}
+
+.campo-erro-msg[hidden] {
+    display: none;
 }
 
 .input-content {
@@ -284,17 +308,114 @@ textarea {
     color: var(--color-text-light); /* Placeholders/Textos */
 }
 
-.toggle-group {
+/* === Slider do valor (tela inicial) ===
+   Medidas tiradas do Figma (no 7651:2769): trilho de 4px em #D5D4D8,
+   preenchimento #EE3124 e polegar de 16px com sombra de 1px.
+   O preenchimento e escrito pelo JS em pixels (--slider-preenchido),
+   nao em porcentagem, para terminar exatamente no centro do polegar. */
+.valor-slider {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 8px; /* somado ao gap de 8px do .form-group = 16px */
+}
+
+.slider-valor {
+    -webkit-appearance: none;
+    appearance: none;
+    display: block;
+    width: 100%;
+    height: 20px;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    cursor: pointer;
+    touch-action: pan-y;
+}
+
+.slider-valor:focus {
+    outline: none;
+}
+
+.slider-valor::-webkit-slider-runnable-track {
+    height: 4px;
+    border: none;
+    border-radius: 2px;
+    background-color: #D5D4D8;
+    background-image: linear-gradient(var(--color-primary), var(--color-primary));
+    background-repeat: no-repeat;
+    background-size: var(--slider-preenchido, 0px) 100%;
+}
+
+.slider-valor::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    margin-top: -6px; /* centraliza o polegar de 16px no trilho de 4px */
+    border: none;
+    border-radius: 50%;
+    background-color: var(--color-primary);
+    box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
+}
+
+.slider-valor::-moz-range-track {
+    height: 4px;
+    border: none;
+    border-radius: 2px;
+    background-color: #D5D4D8;
+}
+
+.slider-valor::-moz-range-progress {
+    height: 4px;
+    border-radius: 2px;
+    background-color: var(--color-primary);
+}
+
+.slider-valor::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border: none;
+    border-radius: 50%;
+    background-color: var(--color-primary);
+    box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
+}
+
+.slider-limites {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 8px;
-    height: 48px;
+}
+
+.slider-limites span {
+    font-size: 12px;
+    line-height: 20px;
+    color: var(--color-text-light);
+}
+
+/* === Switch Credito/Parcela (Figma 7659:2889) ===
+   Trilho em pilula com a metade ativa desenhada por cima. A margem
+   negativa faz a borda vermelha cair exatamente sobre a borda cinza
+   do trilho, como no Figma. */
+.toggle-group {
+    display: flex;
+    align-items: stretch;
+    height: 36px;
+    padding: 0;
+    background-color: var(--color-bg-main);
+    border: 1px solid var(--color-border);
+    border-radius: 24px;
+    box-shadow: var(--shadow-xs);
 }
 
 .toggle-btn {
     flex: 1;
+    margin: -1px;
     height: 36px;
+    border: 1px solid transparent;
     border-radius: 24px;
+    background-color: transparent;
     font-size: 14px;
     line-height: 20px;
     font-weight: 500;
@@ -302,20 +423,21 @@ textarea {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    border: none;
-    transition: all 0.2s;
+    transition: background-color 0.2s, border-color 0.2s, color 0.2s;
 }
 
 .toggle-btn-active {
-    background-color: var(--color-danger-light);
+    background-color: #FEF2F2;
+    border-color: var(--color-primary);
     color: var(--color-danger);
+    box-shadow: var(--shadow-xs);
 }
 
 .toggle-btn-inactive {
-    background-color: var(--color-bg-main);
-    border: 1px solid var(--color-border);
-    color: var(--color-text-dark);
-    box-shadow: var(--shadow-xs);
+    background-color: transparent;
+    border-color: transparent;
+    color: var(--color-text-muted);
+    box-shadow: none;
 }
 
 .btn-primary {
@@ -533,8 +655,10 @@ textarea {
     background-color: var(--color-bg-main);
 }
 
+/* Figma 7446:4016 "Resultado": padding 24px 16px e gap 16px entre o
+   titulo e a lista de planos. O gap virou o padding-bottom daqui. */
 .step3-header {
-    padding: 32px 16px;
+    padding: 24px 16px 16px 16px;
     display: flex;
     justify-content: center;
     text-align: left;
@@ -550,11 +674,13 @@ textarea {
     font-weight: 600;
 }
 
+/* Figma 7446:4018 "Planos": gap 24px entre os cards. O padding-bottom
+   de 24px fecha o frame "Resultado" antes do rodape. */
 .planos-container {
-    padding: 0 16px 16px 16px;
+    padding: 0 16px 24px 16px;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 24px;
 }
 
 .plano-card {
@@ -653,27 +779,25 @@ textarea {
     margin-top: 8px;
 }
 
+/* Figma 7514:6802 "Badge / Yellow": os dois selos de parcela usam o
+   mesmo estilo. So a Parcela Reduzida leva icone de ajuda ao lado. */
 .badge-reduzida, .badge-fixa {
     display: inline-flex;
     align-items: center;
     gap: 4px;
     padding: 4px 8px;
+    border: none;
     border-radius: 8px;
+    background-color: #FEF9C3;
+    color: #A16207;
     font-size: 12px;
+    line-height: 1;
     font-weight: 600;
     width: fit-content;
 }
 
-.badge-reduzida {
-    background-color: #FEF9C3;
-    border: none;
-    color: #A16207;
-}
-
 .badge-fixa {
-    background-color: transparent;
-    border: 1px solid var(--color-text-muted);
-    color: var(--color-text-muted);
+    margin-top: 4px;
 }
 
 .plano-price-wrapper {
@@ -1623,11 +1747,19 @@ html.checkout-ativo .mobile-container {
 }
 
 /* === Tela de conclusao === */
+.conclusao-cartoes {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Figma 7495:3933: card branco com borda #E2E8F0 e raio 6px. */
 .conclusao-identificacao {
     display: flex;
     flex-direction: column;
     gap: 8px;
     padding: 16px;
+    background-color: var(--color-bg-white);
     border: 1px solid #E2E8F0;
     border-radius: 6px;
 }
@@ -1664,12 +1796,16 @@ html.checkout-ativo .mobile-container {
     color: var(--color-text-light);
 }
 
-/* Mesmo miolo do card de proposta, sem borda nem sombra */
+/* Figma 7673:2954: mesmo miolo do card de proposta, agora em card branco
+   com borda #E2E8F0 e raio 6px (o de proposta usa sombra e raio 16px). */
 .resumo-consorcio {
     display: flex;
     flex-direction: column;
     gap: 16px;
-    padding-bottom: 16px;
+    padding: 24px;
+    background-color: var(--color-bg-white);
+    border: 1px solid #E2E8F0;
+    border-radius: 6px;
 }
 
 .resumo-consorcio-titulo {
@@ -1680,37 +1816,53 @@ html.checkout-ativo .mobile-container {
     color: var(--color-text-muted);
 }
 
-/* --- Proximos passos --- */
-.conclusao-passo {
+/* --- Proximos passos (Figma 7495:4039) ---
+   Cards brancos sobre o fundo cinza da tela. Sem numeracao: os passos
+   nao sao cronologicos. */
+.passos-pilha {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+    gap: 24px;
 }
 
-.conclusao-numero {
-    width: 32px;
-    height: 32px;
+.passo-card {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 24px 16px;
+    background-color: var(--color-bg-white);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+}
+
+.passo-conteudo {
     display: flex;
     align-items: center;
-    justify-content: center;
-    background-color: var(--color-primary);
-    border-radius: 8px;
-    font-size: 24px;
-    line-height: 32px;
-    font-weight: 700;
-    color: var(--color-bg-white);
+    gap: 16px;
 }
 
-.conclusao-passo-titulo {
+.passo-ilustra {
+    flex: none;
+    width: 101px;
+    height: 102px;
+    object-fit: contain;
+}
+
+.passo-texto {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.passo-titulo {
     margin: 0;
-    font-size: 20px;
-    line-height: 32px;
+    font-size: 16px;
+    line-height: 24px;
     font-weight: 700;
     color: var(--color-text-muted);
 }
 
-.conclusao-passo-texto {
+.passo-descricao {
     margin: 0;
     font-size: 14px;
     line-height: 20px;

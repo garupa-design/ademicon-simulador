@@ -60,36 +60,136 @@ document.addEventListener('DOMContentLoaded', () => { try {
         inactiveBtn.classList.add('toggle-btn-inactive');
     }
 
+    // === Slider do valor + campo, sempre em sincronia ===
+    // O usuario pode arrastar o slider ou digitar no campo: os dois escrevem
+    // no mesmo valor. Limites e valores iniciais definidos pelo cliente.
+    const sliderValor = document.getElementById('sliderValor');
+    const sliderMin = document.getElementById('sliderMin');
+    const sliderMax = document.getElementById('sliderMax');
+
+    const LIMITES_VALOR = {
+        credito: { min: 80000, max: 1273442.29, padrao: 676721.15 },
+        parcela: { min: 269.84, max: 8534.62, padrao: 4402.23 }
+    };
+
+    let modoValor = 'credito';
+
+    // Agrupamento de milhar por fatiamento, sem grupos de captura ($1),
+    // pelo mesmo motivo das outras mascaras do projeto.
+    function agruparMilhar(inteiro) {
+        let saida = '';
+        let conta = 0;
+        for (let i = inteiro.length - 1; i >= 0; i--) {
+            saida = inteiro.charAt(i) + saida;
+            conta++;
+            if (conta === 3 && i > 0) {
+                saida = '.' + saida;
+                conta = 0;
+            }
+        }
+        return saida;
+    }
+
+    function formatarMoeda(numero) {
+        const centavos = Math.round(Math.abs(numero) * 100);
+        const texto = String(centavos).padStart(3, '0');
+        const inteiro = texto.slice(0, texto.length - 2);
+        const fracao = texto.slice(texto.length - 2);
+        return 'R$ ' + agruparMilhar(inteiro) + ',' + fracao;
+    }
+
+    function numeroDoTexto(texto) {
+        const digitos = String(texto).replace(/\D/g, '');
+        if (!digitos.length) return null;
+        return parseInt(digitos, 10) / 100;
+    }
+
+    // O arraste e continuo (step="any"). Aqui ele vira um numero apresentavel:
+    // as duas pontas mantem o limite exato e o meio anda de real em real na
+    // faixa do credito, de centavo em centavo na faixa da parcela (bem menor).
+    function arredondarValor(numero, limites) {
+        const folga = (limites.max - limites.min) / 1000;
+        if (numero <= limites.min + folga) return limites.min;
+        if (numero >= limites.max - folga) return limites.max;
+        if (limites.max - limites.min < 20000) return Math.round(numero * 100) / 100;
+        return Math.round(numero);
+    }
+
+    // O preenchimento vermelho precisa terminar no centro do polegar, que anda
+    // de 8px ate (largura - 8px). Por isso a conta e em pixels, nao em %.
+    function pintarSlider() {
+        const limites = LIMITES_VALOR[modoValor];
+        const largura = sliderValor.getBoundingClientRect().width;
+        if (!largura) return;
+        const fracao = (Number(sliderValor.value) - limites.min) / (limites.max - limites.min);
+        const posicao = 8 + Math.min(Math.max(fracao, 0), 1) * (largura - 16);
+        sliderValor.style.setProperty('--slider-preenchido', posicao + 'px');
+    }
+
+    function moverSliderPara(numero) {
+        const limites = LIMITES_VALOR[modoValor];
+        const preso = Math.min(Math.max(numero, limites.min), limites.max);
+        sliderValor.value = String(preso);
+        pintarSlider();
+    }
+
+    function aplicarModoValor(modo) {
+        modoValor = modo;
+        const limites = LIMITES_VALOR[modo];
+        labelValor.textContent = modo === 'credito' ? 'Valor do crédito' : 'Valor da parcela';
+        inputValor.placeholder = formatarMoeda(limites.padrao);
+        sliderValor.min = String(limites.min);
+        sliderValor.max = String(limites.max);
+        sliderValor.setAttribute('aria-label', labelValor.textContent);
+        sliderMin.textContent = formatarMoeda(limites.min);
+        sliderMax.textContent = formatarMoeda(limites.max);
+        inputValor.value = formatarMoeda(limites.padrao);
+        moverSliderPara(limites.padrao);
+    }
+
     btnCredito.addEventListener('click', () => {
         setActiveToggle(btnCredito, btnParcela);
-        labelValor.textContent = 'Valor do crédito';
-        inputValor.placeholder = 'R$ 100.000,00';
+        aplicarModoValor('credito');
     });
 
     btnParcela.addEventListener('click', () => {
         setActiveToggle(btnParcela, btnCredito);
-        labelValor.textContent = 'Valor da parcela';
-        inputValor.placeholder = 'R$ 10.000,00';
+        aplicarModoValor('parcela');
     });
 
-    // === Máscara de Moeda Simples ===
-    inputValor.addEventListener('input', (e) => {
-        let value = e.target.value.replace(/\D/g, ''); // Remove tudo que não for número
-        
-        if (value.length === 0) {
-            e.target.value = '';
+    // Arrastar o slider escreve direto no campo.
+    sliderValor.addEventListener('input', () => {
+        const limites = LIMITES_VALOR[modoValor];
+        const numero = Number(sliderValor.value);
+        inputValor.value = formatarMoeda(arredondarValor(numero, limites));
+        pintarSlider();
+    });
+
+    // Digitar no campo move o slider (e aplica a mascara de moeda).
+    inputValor.addEventListener('input', () => {
+        const numero = numeroDoTexto(inputValor.value);
+        if (numero === null) {
+            inputValor.value = '';
             return;
         }
-
-        // Divide por 100 para ter os centavos
-        value = (parseInt(value) / 100).toFixed(2);
-        
-        // Formata para pt-BR
-        value = value.replace('.', ',');
-        value = value.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
-        
-        e.target.value = 'R$ ' + value;
+        inputValor.value = formatarMoeda(numero);
+        moverSliderPara(numero);
     });
+
+    // Ao sair do campo, prende o valor digitado dentro dos limites.
+    inputValor.addEventListener('blur', () => {
+        const numero = numeroDoTexto(inputValor.value);
+        if (numero === null) return;
+        const limites = LIMITES_VALOR[modoValor];
+        const preso = Math.min(Math.max(numero, limites.min), limites.max);
+        if (preso !== numero) inputValor.value = formatarMoeda(preso);
+        moverSliderPara(preso);
+    });
+
+    // A largura muda com a rotacao do celular: repinta o trilho.
+    window.addEventListener('resize', pintarSlider);
+
+    aplicarModoValor('credito');
 
     // Botão simular (Troca de tela)
     const btnSimular = document.getElementById('btnSimular');
@@ -167,6 +267,48 @@ document.addEventListener('DOMContentLoaded', () => { try {
     const step2Inputs = document.querySelectorAll(".step2-form .input-field");
     const btnProximaEtapa = document.getElementById("btnProximaEtapa");
 
+    // === Nome completo: exige sobrenome ===
+    // Uma palavra so e o primeiro nome. O contrato do consorcio precisa do
+    // nome civil inteiro, entao pedimos o resto antes de seguir.
+    const campoNome = document.getElementById('nomeCompleto');
+    const nomeWrapper = document.getElementById('nomeWrapper');
+    const nomeErro = document.getElementById('nomeErro');
+
+    function partesDoNome(texto) {
+        return String(texto).trim().split(/\s+/).filter(p => p.length > 0);
+    }
+
+    function nomeEstaCompleto(texto) {
+        const partes = partesDoNome(texto);
+        if (partes.length < 2) return false;
+        // Ultima parte com uma letra so e inicial, nao sobrenome.
+        return partes[partes.length - 1].length >= 2;
+    }
+
+    function marcarErroNome(mostrar) {
+        nomeWrapper.classList.toggle('campo-erro', mostrar);
+        nomeErro.hidden = !mostrar;
+    }
+
+    // O erro aparece so quando o usuario sai do campo: quem esta digitando
+    // "Joao Carlos" passa por "Joao" no caminho e nao merece um alerta.
+    campoNome.addEventListener('blur', () => {
+        // So limpa espacos sobrando; a caixa fica como o usuario escreveu,
+        // porque nome proprio tem grafia que nenhuma regra automatica acerta
+        // sempre (d'Avila, McCarthy, di Napoli).
+        const texto = partesDoNome(campoNome.value).join(' ');
+        campoNome.value = texto;
+        marcarErroNome(texto.length > 0 && !nomeEstaCompleto(texto));
+    });
+
+    // Ja corrigiu enquanto digita? O erro sai na hora.
+    campoNome.addEventListener('input', () => {
+        if (nomeWrapper.classList.contains('campo-erro') && nomeEstaCompleto(campoNome.value)) {
+            marcarErroNome(false);
+        }
+    });
+
+
     function checkStep2Form() {
         let allFilled = true;
         step2Inputs.forEach(input => {
@@ -175,7 +317,7 @@ document.addEventListener('DOMContentLoaded', () => { try {
             }
         });
 
-        if (allFilled) {
+        if (allFilled && nomeEstaCompleto(campoNome.value)) {
             btnProximaEtapa.classList.remove("btn-disabled");
             // btn-primary já tem a cor vermelha quando não tem btn-disabled
         } else {
@@ -239,8 +381,15 @@ document.addEventListener('DOMContentLoaded', () => { try {
 
     if(btnProximaEtapa) {
         btnProximaEtapa.addEventListener('click', () => {
-            // Removida a trava para testes (se estiver disabled, avança igual)
-            
+            // Os outros campos seguem liberados para teste, mas o nome nao
+            // passa pela metade: e ele que vai para o contrato.
+            const nomeDigitado = campoNome.value.trim();
+            if (nomeDigitado.length > 0 && !nomeEstaCompleto(nomeDigitado)) {
+                marcarErroNome(true);
+                campoNome.focus();
+                return;
+            }
+
             capturarEtapa2();
 
             if (modoEdicao) { voltarParaRevisao(); return; }
