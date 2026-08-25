@@ -800,6 +800,7 @@ textarea {
     margin-top: 4px;
 }
 
+
 .plano-price-wrapper {
     display: flex;
     align-items: center;
@@ -834,6 +835,12 @@ textarea {
     position: sticky;
     bottom: 0;
     z-index: 10;
+}
+
+/* O .btn-primary carrega margin-top: 8px por causa da tela inicial.
+   Aqui o espacamento ja vem do padding e do gap do rodape. */
+.step3-footer > button {
+    margin-top: 0;
 }
 
 .btn-secondary {
