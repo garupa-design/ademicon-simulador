@@ -18,9 +18,9 @@
             <div style="width: 36px;"></div>
         </header>
 
-        <header class="top-navbar" id="step4Header" style="display: none;">
-            <button type="button" class="icon-button" aria-label="Voltar" id="btnBackToStep3">
-                <img src="assets/icon-arrow-left.svg" alt="Voltar">
+        <header class="top-navbar" id="especialistaHeader" style="display: none;">
+            <button type="button" class="icon-button" aria-label="Voltar" id="btnVoltarEspecialista">
+                <img src="assets/icon-arrow-left.svg" alt="">
             </button>
             <span style="font-size: 16px; font-weight: 700; color: var(--color-text-dark);">Checkout</span>
             <div style="width: 36px;"></div>
@@ -166,7 +166,7 @@
                     <label class="custom-checkbox">
                         <input type="checkbox">
                         <span class="checkmark"><img src="assets/icon-check.svg" alt=""></span>
-                        <span class="checkbox-label">Quero receber novidades e promoções</span>
+                        <span class="checkbox-label">Aceito os <span class="checkbox-destaque">Termos de Privacidade</span></span>
                     </label>
                 </div>
                 <button type="button" class="btn-primary btn-disabled" id="btnProximaEtapa">Próxima Etapa</button>
@@ -298,50 +298,6 @@
                 <button type="button" class="btn-secondary" id="btnEspecialista">Falar com especialista</button>
             </div>
         </main>
-        <!-- Etapa 4: Especialista -->
-        <main id="step4" class="main-content" style="display: none; background-color: var(--color-bg-white);">
-            <div class="step4-content">
-                <div class="step4-intro">
-                    <h2 class="step4-title">Procure um especialista</h2>
-                    <p class="step4-desc">São 300 lojas localizadas em 24 Estados e o Distrito Federal. Encontre a Ademicon mais próxima e entre em contato para solicitar a contratação.</p>
-                </div>
-                
-                <!-- Breadcrumb Card (Hidden initially) -->
-                <div id="breadcrumbCard" class="step4-enderecos" style="display: none; flex: none; padding: 16px 24px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <img src="assets/icon-arrow-left.svg" id="breadcrumbBack" style="cursor: pointer; display: none;">
-                            <h3 id="breadcrumbTitle" style="font-size: 16px; font-weight: 500; color: #525252; margin: 0;">Paraná</h3>
-                        </div>
-                        <img src="assets/icon-close.svg" alt="Fechar" id="breadcrumbClose" style="cursor: pointer; width: 24px; height: 24px;">
-                    </div>
-                </div>
-
-                <!-- Main Card (Search & List OR Map details) -->
-                <div id="mainSearchCard" class="step4-enderecos">
-                    <h3 id="enderecosTitle" style="margin: 0;">Selecione o Estado</h3>
-                    <div class="search-wrapper" id="searchWrapper">
-                        <img src="assets/icon-search.svg" alt="Buscar">
-                        <input type="text" id="searchInput" placeholder="Buscar">
-                    </div>
-                    
-                    <div class="enderecos-list" id="enderecosList">
-                        <!-- Itens renderizados dinamicamente pelo JS -->
-                    </div>
-
-                    <!-- Map View -->
-                    <div id="mapView" style="display: none; flex-direction: column; gap: 16px;">
-                        <div>
-                            <h3 id="mapTitle" style="font-size: 20px; font-weight: 600; color: #262626; margin: 0;">Ahú</h3>
-                            <p id="mapAddress" style="font-size: 14px; color: #525252; margin-top: 8px; line-height: 20px;">Endereço aqui</p>
-                            <p id="mapPhone" style="font-size: 20px; font-weight: 600; color: #262626; margin-top: 16px;">(00) 0000-0000</p>
-                        </div>
-                        <div id="mapImageContainer" style="width: 100%; height: 300px; background-color: #E5E5E5; border-radius: 8px; overflow: hidden; background-image: url('assets/map-image.png'); background-size: cover; background-position: center;">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </main>
 
         <!-- Modais Info -->
         <div id="infoModal" class="full-modal" style="display: none;">
@@ -369,6 +325,21 @@
     </header>
 
     <!-- Checkout Step 1 - contem todas as etapas de Dados Pessoais -->
+        <!-- Contato com especialista (Figma 7489:2206) -->
+        <main class="main-content" id="especialista" style="display: none;">
+            <div class="especialista-conteudo">
+                <div class="especialista-bloco">
+                    <img src="assets/especialista.png" alt="" class="especialista-img">
+                    <div class="especialista-textos">
+                        <h2 class="especialista-titulo"><span class="text-primary">Um especialista</span> vai entrar em contato com você</h2>
+                        <p class="especialista-apoio">Em breve um especialista Ademicon entrará em contato para tirar todas as suas dúvidas.</p>
+                        <p class="especialista-apoio">Até breve!</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-secondary" id="btnEntendiEspecialista">Entendi, vou aguardar!</button>
+            </div>
+        </main>
+
     <main id="checkoutStep1" class="checkout-tela" style="display: none;">
 
         <!-- Rola entre o header e o botao -->
@@ -642,9 +613,9 @@
                     <h3 class="checkout-label">Selecione o método de pagamento.</h3>
                     <div class="radio-lista">
                         <label class="radio-opcao">
-                            <input type="radio" name="pagamento" value="PIX" data-botao="Gerar código PIX" checked>
+                            <input type="radio" name="pagamento" value="Pix" data-botao="Gerar código Pix" checked>
                             <span class="radio-marca"></span>
-                            <span class="radio-texto">PIX</span>
+                            <span class="radio-texto">Pix</span>
                         </label>
                         <label class="radio-opcao">
                             <input type="radio" name="pagamento" value="Cartão de Crédito" data-botao="Pagar com cartão">
@@ -655,7 +626,68 @@
                 </div>
             </section>
 
-            <!-- 12. PIX: QR Code -->
+            <!-- 12. Cartão de crédito (Figma 7551:3034) -->
+            <section class="checkout-etapa" data-etapa="cartao" data-rotulo="Passo 3 de 3: Pagamento"
+                     data-botao="Pagar com Cartão de Crédito">
+                <h2 class="checkout-titulo">Cartão de Crédito</h2>
+
+                <div class="cartao-campos">
+                    <div class="checkout-campo">
+                        <label class="form-label" for="cartaoNumero">Número</label>
+                        <div class="input-wrapper">
+                            <input type="text" class="input-field" id="cartaoNumero"
+                                   placeholder="0000 0000 0000 0000" inputmode="numeric"
+                                   autocomplete="cc-number" maxlength="19" data-autofoco>
+                        </div>
+                    </div>
+
+                    <div class="cartao-dupla">
+                        <div class="checkout-campo">
+                            <label class="form-label" for="cartaoVencimento">Vencimento</label>
+                            <div class="input-wrapper">
+                                <input type="text" class="input-field" id="cartaoVencimento"
+                                       placeholder="00/00" inputmode="numeric"
+                                       autocomplete="cc-exp" maxlength="5">
+                            </div>
+                        </div>
+                        <div class="checkout-campo">
+                            <label class="form-label" for="cartaoCvc">CVC</label>
+                            <div class="input-wrapper">
+                                <input type="text" class="input-field" id="cartaoCvc"
+                                       placeholder="000" inputmode="numeric"
+                                       autocomplete="cc-csc" maxlength="4">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="checkout-campo">
+                        <label class="form-label" for="cartaoNome">Nome (igual ao cartão)</label>
+                        <div class="input-wrapper">
+                            <input type="text" class="input-field" id="cartaoNome"
+                                   placeholder="Ex: JOAO C SILVA" autocomplete="cc-name"
+                                   autocapitalize="characters">
+                        </div>
+                    </div>
+
+                    <div class="checkout-campo">
+                        <label class="form-label" for="cartaoCpf">CPF</label>
+                        <div class="input-wrapper">
+                            <input type="text" class="input-field" id="cartaoCpf"
+                                   placeholder="000.000.000-00" inputmode="numeric" maxlength="14">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-card" style="margin-top: 0;">
+                    <img src="assets/info-loan.png" alt="" class="info-card-img">
+                    <div class="info-card-content">
+                        <h4 class="info-card-title">Consórcio não é Empréstimo!</h4>
+                        <p class="info-card-text">Crédito disponível após a contemplação por sorteio, lance ou fim do prazo do grupo.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 13. Pix: QR Code -->
             <section class="checkout-etapa" data-etapa="pix" data-rotulo="Passo 3 de 3: Pagamento" data-sem-rodape>
                 <div class="pix-titulos">
                     <h2 class="checkout-titulo">Finalize o pagamento para confirmar sua cota.</h2>
@@ -663,7 +695,7 @@
                 </div>
 
                 <div class="pix-card">
-                    <img src="assets/qr-pix.png" alt="QR Code para pagamento via PIX" class="pix-qr" id="pixQr">
+                    <img src="assets/qr-pix.png" alt="QR Code para pagamento via Pix" class="pix-qr" id="pixQr">
                     <div class="pix-qr-expirado" id="pixQrExpirado" role="status" hidden><span>Código expirado</span></div>
 
                     <p class="pix-parcela">Primeira parcela: R$ 1.230,23</p>
@@ -780,24 +812,24 @@
                 <div class="passos-pilha">
                     <article class="passo-card">
                         <div class="passo-conteudo">
-                            <img src="assets/passo-app.png" alt="" class="passo-ilustra">
+                            <img src="assets/passo-area-cliente.png" alt="" class="passo-ilustra">
                             <div class="passo-texto">
-                                <h3 class="passo-titulo">Baixe o App</h3>
-                                <p class="passo-descricao">Acompanhe sua cota, veja as assembleias e ofereça lances direto do celular.</p>
+                                <h3 class="passo-titulo">Cadastre-se na Área do Cliente</h3>
+                                <p class="passo-descricao">É por ela que você acessa tudo sobre o seu consórcio e libera o acesso ao app.</p>
                             </div>
                         </div>
-                        <button type="button" class="btn-secondary pix-acao">Baixar Aplicativo</button>
+                        <button type="button" class="btn-secondary pix-acao">Cadastrar na Área do Cliente</button>
                     </article>
 
                     <article class="passo-card">
                         <div class="passo-conteudo">
-                            <img src="assets/passo-area-cliente.png" alt="" class="passo-ilustra">
+                            <img src="assets/passo-app.png" alt="" class="passo-ilustra">
                             <div class="passo-texto">
-                                <h3 class="passo-titulo">Cadastre-se na Área do Cliente</h3>
-                                <p class="passo-descricao">Cadastre-se na Área do Cliente para acompanhar seu consórcio.</p>
+                                <h3 class="passo-titulo">Baixe o App</h3>
+                                <p class="passo-descricao">Depois de se cadastrar na Área do Cliente, baixe o app para acompanhar tudo do seu celular.</p>
                             </div>
                         </div>
-                        <button type="button" class="btn-secondary pix-acao">Cadastrar na Área do Cliente</button>
+                        <button type="button" class="btn-secondary pix-acao">Baixar Aplicativo</button>
                     </article>
 
                     <article class="passo-card">
@@ -846,6 +878,7 @@
                     <span class="checkbox-texto">Quero receber ofertas e novidades.</span>
                 </label>
             </div>
+            <p class="rodape-parcela" id="rodapeParcela" hidden>Primeira parcela: R$ 1.230,23</p>
             <div class="rodape-acao">
                 <span class="rodape-dica" id="rodapeDica" hidden>Você será redirecionado</span>
                 <button id="btnNextCheckout" class="btn-primary">Próxima etapa</button>
@@ -854,6 +887,6 @@
     </main>
 
 </div>
-    <script src="script.js?v=1787584200000"></script>
+    <script src="script.js?v=1788273600000"></script>
     </body>
 </html>

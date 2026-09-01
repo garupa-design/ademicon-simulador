@@ -258,10 +258,38 @@ document.addEventListener('DOMContentLoaded', () => { try {
         return saida;
     }
 
+    // Cartao: numero em grupos de 4 e vencimento MM/AA.
+    function mascaraCartao(valor) {
+        const d = valor.replace(/\D/g, '').slice(0, 16);
+        let saida = '';
+        for (let i = 0; i < d.length; i++) {
+            if (i > 0 && i % 4 === 0) saida += ' ';
+            saida += d.charAt(i);
+        }
+        return saida;
+    }
+
+    function mascaraVencimento(valor) {
+        const d = valor.replace(/\D/g, '').slice(0, 4);
+        let saida = d.slice(0, 2);
+        if (d.length > 2) saida += '/' + d.slice(2, 4);
+        return saida;
+    }
+
+    function mascaraNumeros(limite) {
+        return function (valor) {
+            return valor.replace(/\D/g, '').slice(0, limite);
+        };
+    }
+
     aplicarMascara(document.getElementById('cpf'), mascaraCPF);
     aplicarMascara(document.getElementById('telefone'), mascaraTelefone);
     aplicarMascara(document.getElementById('checkoutCpf'), mascaraCPF);
     aplicarMascara(document.getElementById('checkoutNascimento'), mascaraData);
+    aplicarMascara(document.getElementById('cartaoNumero'), mascaraCartao);
+    aplicarMascara(document.getElementById('cartaoVencimento'), mascaraVencimento);
+    aplicarMascara(document.getElementById('cartaoCvc'), mascaraNumeros(4));
+    aplicarMascara(document.getElementById('cartaoCpf'), mascaraCPF);
 
     // === Validação da Etapa 2 ===
     const step2Inputs = document.querySelectorAll(".step2-form .input-field");
@@ -352,16 +380,59 @@ document.addEventListener('DOMContentLoaded', () => { try {
 
 
 
-    // Click no Logo para voltar para a tela inicial
+    // O header e o mesmo nas telas 1, 2 e 3. Nas duas de dentro do fluxo ele
+    // troca o menu por uma seta de voltar (Figma 8043:4929), e cada uma volta
+    // para a anterior. Na tela inicial continua sendo o menu.
     const logoAdemicon = document.getElementById("logoAdemicon");
-    if(logoAdemicon) {
+    const iconeHeader = logoAdemicon && logoAdemicon.querySelector('img');
+
+    function telaAtualDoFluxo() {
+        const step3 = document.getElementById('step3');
+        if (step2 && step2.style.display !== 'none') return 'step2';
+        if (step3 && step3.style.display !== 'none') return 'step3';
+        return 'step1';
+    }
+
+    function atualizarIconeHeader() {
+        if (!iconeHeader) return;
+        const podeVoltar = telaAtualDoFluxo() !== 'step1';
+        iconeHeader.src = podeVoltar ? 'assets/icon-arrow-left.svg' : 'assets/menu.svg';
+        iconeHeader.alt = podeVoltar ? 'Voltar' : 'Menu';
+        logoAdemicon.setAttribute('aria-label', podeVoltar ? 'Voltar' : 'Menu');
+    }
+
+    if (logoAdemicon) {
         logoAdemicon.addEventListener("click", () => {
-            step2.style.display = "none";
-            const step3 = document.getElementById("step3");
-            if (step3) step3.style.display = "none";
-            step1.style.display = "flex"; // usa div normal, entao main é block
+            const step3 = document.getElementById('step3');
+            const atual = telaAtualDoFluxo();
+
+            // Vindo da revisao do checkout, a seta desfaz a edicao em vez de
+            // sair do fluxo e deixar o checkout num estado pela metade.
+            if (atual === 'step2' && modoEdicao) {
+                voltarParaRevisao();
+                return;
+            }
+
+            if (atual === 'step3') {
+                step3.style.display = 'none';
+                step2.style.display = 'flex';
+            } else if (atual === 'step2') {
+                step2.style.display = 'none';
+                step1.style.display = 'flex'; // usa div normal, entao main é block
+            }
             window.scrollTo(0, 0);
         });
+    }
+
+    // Observamos as duas telas em vez de espalhar a troca do icone pelos
+    // varios pontos do codigo que mostram ou escondem cada uma.
+    if (iconeHeader) {
+        const observador = new MutationObserver(atualizarIconeHeader);
+        ['step2', 'step3'].forEach(id => {
+            const tela = document.getElementById(id);
+            if (tela) observador.observe(tela, { attributes: true, attributeFilter: ['style'] });
+        });
+        atualizarIconeHeader();
     }
 
 
@@ -369,7 +440,7 @@ document.addEventListener('DOMContentLoaded', () => { try {
 
     // === Transição Etapa 2 -> Etapa 3 ===
     const step3 = document.getElementById('step3');
-    window.appData = { produto: 'imóvel', nome: '', email: '', cpf: '', telefone: '', nascimento: '', genero: '', estadoCivil: '', renda: '', profissao: '', cep: '', endereco: null, numero: '', complemento: '', semComplemento: false, pagamento: 'PIX' };
+    window.appData = { produto: 'imóvel', nome: '', email: '', cpf: '', telefone: '', nascimento: '', genero: '', estadoCivil: '', renda: '', profissao: '', cep: '', endereco: null, numero: '', complemento: '', semComplemento: false, pagamento: 'Pix' };
 
     function capturarEtapa2() {
         const campos = document.querySelectorAll('.step2-form .input-field');
@@ -428,13 +499,40 @@ document.addEventListener('DOMContentLoaded', () => { try {
     const modalData = {
         taxaAdm: {
             title: 'Taxa ADM',
-            text: 'A Taxa Administrativa é um valor diluído nas prestações mensais que serve para a gestão dos grupos de consorciados, ela já vem calculada nas parcelas e não é cumulativa. Possui valor fixo pré-estipulado em contrato.\n\nComo é calculada?\n\nA taxa é de 0,12% ao mês, o que equivale a aproximadamente 1,45% ao ano. Este valor é descontado de sua parcela mensal, junto com a contribuição ao fundo comum do grupo.'
+            // Em "partes" porque este texto tem subtitulos em negrito. Os
+            // outros modais seguem no formato antigo, so com "text".
+            partes: [
+                'A Taxa Administrativa é o valor destinado à gestão dos grupos de consorciados. No simulador, mostramos uma média mensal para facilitar a comparação, mas ela não reflete a forma exata de cobrança.\n\n',
+                { forte: 'Como a taxa é cobrada?' },
+                '\n\nA cobrança real ocorre no início do plano, sendo o valor total diluído e arrecadado nas parcelas.\n\n',
+                { forte: 'Qual é a taxa total?' },
+                '\n\nA Taxa Administrativa Total estabelecida em contrato para este plano é de 24%.'
+            ]
         },
         parcelaReduzida: {
             title: 'Parcela reduzida',
             text: 'Com a parcela reduzida, você começa pagando um valor menor e só assume a parcela cheia depois da contemplação.\n\nPor exemplo: para um crédito de R$ 380mil, você pode pagar R$ 451 por mês.\n\nSe for contemplado no 15º mês, por exemplo, a partir do 16º mês a sua parcela passa a ser R$ 903. A diferença é diluída nas parcelas restantes.\n\nOs valores e prazos variam conforme o grupo e o momento da contemplação.'
         }
     };
+
+    // Monta o corpo do modal por no, sem innerHTML: com "partes", os itens
+    // { forte } viram <strong>; sem elas, cai no texto corrido de sempre.
+    function preencherTextoModal(dados) {
+        infoModalText.textContent = '';
+        if (!dados.partes) {
+            infoModalText.textContent = dados.text || '';
+            return;
+        }
+        dados.partes.forEach(parte => {
+            if (typeof parte === 'string') {
+                infoModalText.appendChild(document.createTextNode(parte));
+                return;
+            }
+            const forte = document.createElement('strong');
+            forte.textContent = parte.forte;
+            infoModalText.appendChild(forte);
+        });
+    }
 
     const helpIcons = document.querySelectorAll('.icon-help-wrapper');
     helpIcons.forEach(icon => {
@@ -443,7 +541,7 @@ document.addEventListener('DOMContentLoaded', () => { try {
             const type = icon.getAttribute('data-modal');
             if(modalData[type]) {
                 infoModalTitle.textContent = modalData[type].title;
-                infoModalText.textContent = modalData[type].text;
+                preencherTextoModal(modalData[type]);
                 infoModal.style.display = 'flex';
                 document.body.style.overflow = 'hidden'; // Impede rolagem do fundo
             }
@@ -459,400 +557,61 @@ document.addEventListener('DOMContentLoaded', () => { try {
     if(btnEntendi) btnEntendi.addEventListener('click', closeInfoModal);
 
 
-    // === Etapa 4: Especialista ===
-    const btnEspecialista = document.getElementById('btnEspecialista');
-    const step4 = document.getElementById('step4');
+    // === Falar com especialista ===
+    // O mapa de unidades saiu em 2026-08-31 e virou peca isolada em
+    // /unidades/. O contato passou pelo WhatsApp e hoje leva para a tela de
+    // aviso: um especialista entra em contato.
     const globalHeader = document.getElementById('globalHeader');
-    const step4Header = document.getElementById('step4Header');
-    const btnBackToStep3 = document.getElementById('btnBackToStep3');
-    // enderecosList redeclared
-    // searchInput redeclared
+    const especialista = document.getElementById('especialista');
+    const especialistaHeader = document.getElementById('especialistaHeader');
 
-            const estados = [
-        'Acre', 'Alagoas', 'Amapá', 'Amazonas', 'Bahia', 'Ceará', 'Distrito Federal',
-        'Espírito Santo', 'Goiás', 'Maranhão', 'Mato Grosso', 'Mato Grosso do Sul',
-        'Minas Gerais', 'Pará', 'Paraíba', 'Paraná', 'Pernambuco', 'Piauí',
-        'Rio de Janeiro', 'Rio Grande do Norte', 'Rio Grande do Sul', 'Rondônia',
-        'Roraima', 'Santa Catarina', 'São Paulo', 'Sergipe', 'Tocantins'
-    ];
+    // A tela e alcancada de dentro e de fora do checkout. Em vez de saber de
+    // onde veio, ela guarda o que estava visivel e restaura na volta.
+    const TELAS_TROCAVEIS = ['globalHeader', 'checkoutHeader', 'step1', 'step2', 'step3', 'checkoutStep1'];
+    let telaAnteriorEspecialista = null;
 
-    const cidadesFake = {
-        'Paraná': ['Curitiba', 'Londrina', 'Maringá', 'Ponta Grossa', 'Cascavel'],
-        'São Paulo': ['São Paulo', 'Campinas', 'Guarulhos', 'Osasco', 'Santos'],
-        'Rio de Janeiro': ['Rio de Janeiro', 'Niterói', 'São Gonçalo', 'Duque de Caxias'],
-        'default': ['Cidade Centro', 'Cidade Norte', 'Cidade Sul']
-    };
+    function falarComEspecialista() {
+        if (!especialista) return;
 
-    const enderecosFake = {
-        'Curitiba': [
-  {
-    "nome": "Ahú",
-    "address": "Avenida Anita Garibaldi, 2319, Lj 01, Ahú    CEP: 82200-530",
-    "phone": "(41) 3019-2211"
-  },
-  {
-    "nome": "Alto da XV",
-    "address": "Rua Mal Deodoro, 1600, Alto da XV   CEP: 80045-090",
-    "phone": "(41) 3121-2000"
-  },
-  {
-    "nome": "Avenida das Torres",
-    "address": "Avenida Comendador Franco, 3306, Guabirotuba  CEP: 81520-000",
-    "phone": "(41) 3521-0721"
-  },
-  {
-    "nome": "Bacacheri",
-    "address": "Rua Estados Unidos, 1205, Bacacheri, 82510-050",
-    "phone": "(41) 3077-7779"
-  },
-  {
-    "nome": "Batel I",
-    "address": "Rua Av. Sete de setembro, 5914 - Batel,  CEP: 80240-000",
-    "phone": "(41) 3024-3939 |  41 99700-2620"
-  },
-  {
-    "nome": "Batel II",
-    "address": "Av. Sete de setembro, 5863 - Batel, CEP: 80240-001",
-    "phone": "(41) 3044-1438 | (41) 99127-9999"
-  },
-  {
-    "nome": "Cajuru",
-    "address": "Avenida Vicente de Carvalho, 113, Cajuru  CEP: 82940-370",
-    "phone": "(41) 3233-4567"
-  },
-  {
-    "nome": "Capão Raso",
-    "address": "R. Marechal Althayr Roszanniy, 1050 - Capão Raso, Curitiba - PR, 81110-350",
-    "phone": "(41) 99104-3904"
-  },
-  {
-    "nome": "Centro",
-    "address": "Av. Vicente Machado, 1412 - Centro, Curitiba - PR, 80420-011",
-    "phone": "(41) 99836-0060"
-  },
-  {
-    "nome": "Champagnat",
-    "address": "Edificio Helbor, Rua Padre Anchieta, 2050, Sala 1007, CEP: 80730-000",
-    "phone": "(41) 3039-7997"
-  },
-  {
-    "nome": "Ecoville",
-    "address": "R. Prof. João Falarz, 1765 - Campo Comprido Ecoville, CEP: 81280-330",
-    "phone": "(41) 3328-9758"
-  },
-  {
-    "nome": "Estação",
-    "address": " R. Rockefeller, 152 - Rebouças, Curitiba - PR, 80230-130",
-    "phone": "(41) 99127-9999"
-  },
-  {
-    "nome": "Fazendinha",
-    "address": "R. João Bettega, 1940 - Portão, Curitiba - PR, 81070-462",
-    "phone": " (41) 98411-6579"
-  },
-  {
-    "nome": "Hauer",
-    "address": "R. Anne Frank, 1915 - Hauer CEP: 81610-020",
-    "phone": "(41) 3387-1796 "
-  },
-  {
-    "nome": "Hugo Lange",
-    "address": "Rua Augusto Stresser, 1230 - Hugo Lange, Curitiba - PR, 80040-345",
-    "phone": "(41) 99132-0073"
-  },
-  {
-    "nome": "Jardim Social",
-    "address": "R. Fagundes Varela, 1722 - Loja 09 - Jardim Social, Curitiba - PR, 80530-040",
-    "phone": "(41) 99849-9354"
-  },
-  {
-    "nome": "Juvevê",
-    "address": "Rua Alberto Bolliger, 700, Juvevê CEP:80030-280",
-    "phone": "(41) 3353-2003"
-  },
-  {
-    "nome": "Kennedy",
-    "address": "Avenida Presidente Kennedy, 651, Parolin, CEP: 80220-200",
-    "phone": "(41) 3121-4000"
-  },
-  {
-    "nome": "Mercês",
-    "address": "Rua Brigadeiro Franco, 747, Mercês,  CEP: 80430-210",
-    "phone": "(41) 3085-2273"
-  },
-  {
-    "nome": "Pinheirinho ",
-    "address": "Rua Valentin Nichele, 215 - Pinheirinho, Curitiba - PR, 81150-310",
-    "phone": "(41) 99669-9104"
-  },
-  {
-    "nome": "Portão",
-    "address": "Avenida Rep. Argentina, 2557 - Portão   80610-260",
-    "phone": "(41) 3023-8209"
-  },
-  {
-    "nome": "Rebouças",
-    "address": "Rua Lamenha Lins, 1547, Rebouças  CEP: 80250-020",
-    "phone": "(41) 3078-5938"
-  },
-  {
-    "nome": "Santa Cândida",
-    "address": "R. Fernando de Noronha, 1089 - Santa Cândida, Curitiba - PR, 82650-145",
-    "phone": "(41) 98519-9064"
-  },
-  {
-    "nome": "Santa Felicidade",
-    "address": "Avenida Manoel Ribas, 4824, Lj 01, Santa Felicidade  CEP: 82400-000",
-    "phone": "(41) 3372-2010"
-  },
-  {
-    "nome": "Sede Ademicon",
-    "address": "Av. Sete de Setembro, 5870 - Batel",
-    "phone": "(41) 3019-2211"
-  },
-  {
-    "nome": "Sítio Cercado",
-    "address": "R. Izaac Ferreira da Cruz, 4615 - Sítio Cercado, Curitiba - PR, 81910-000",
-    "phone": "(41) 99659-1232"
-  },
-  {
-    "nome": "Uberaba",
-    "address": "Av. Sen. Salgado Filho, 4554 - loja 12B - Uberaba, Curitiba - PR, 81570-001",
-    "phone": "(41) 99255-9550"
-  },
-  {
-    "nome": "Xaxim",
-    "address": "R. Francisco Derosso, 3073 - Loja 10 - Xaxim, Curitiba - PR, 81720-000",
-    "phone": "(41) 99689-4208"
-  },
-  {
-    "nome": "Água Verde",
-    "address": "R. Castro, 730 - Loja 03 - Água Verde, Curitiba - PR, 80620-300",
-    "phone": "(41) 99192-1575"
-  }
-],
-        'default': [
-            { nome: 'Unidade Centro', address: 'Rua Principal, 123', phone: '(00) 0000-0000' },
-            { nome: 'Unidade Shopping', address: 'Av Comercial, 456', phone: '(00) 1111-2222' }
-        ]
-    };
+        telaAnteriorEspecialista = {
+            visiveis: TELAS_TROCAVEIS
+                .map(id => document.getElementById(id))
+                .filter(el => el && el.style.display !== 'none')
+                .map(el => [el.id, el.style.display]),
+            noCheckout: document.documentElement.classList.contains('checkout-ativo')
+        };
 
-    const allDataFlattened = [];
-    estados.forEach(estado => {
-        allDataFlattened.push({ type: 'estado', label: estado, refEstado: estado });
-        
-        let cidades = cidadesFake[estado] || cidadesFake['default'];
-        cidades.forEach(cidade => {
-            allDataFlattened.push({ type: 'cidade', label: cidade, refEstado: estado, refCidade: cidade });
-            
-            let unidades = enderecosFake[cidade] || enderecosFake['default'];
-            unidades.forEach(unidade => {
-                allDataFlattened.push({
-                    type: 'endereco',
-                    label: unidade.nome,
-                    refEstado: estado,
-                    refCidade: cidade,
-                    address: unidade.address,
-                    phone: unidade.phone
-                });
-            });
+        // O modo checkout prende o container na altura do visualViewport;
+        // esta tela rola normal, entao ele sai enquanto ela esta no ar.
+        sairDoCheckout();
+        telaAnteriorEspecialista.visiveis.forEach(([id]) => {
+            document.getElementById(id).style.display = 'none';
         });
+        especialistaHeader.style.display = 'flex';
+        especialista.style.display = 'flex';
+        window.scrollTo(0, 0);
+    }
+
+    function voltarDoEspecialista() {
+        if (!telaAnteriorEspecialista) return;
+        especialistaHeader.style.display = 'none';
+        especialista.style.display = 'none';
+        telaAnteriorEspecialista.visiveis.forEach(([id, exibicao]) => {
+            document.getElementById(id).style.display = exibicao;
+        });
+        if (telaAnteriorEspecialista.noCheckout) entrarNoCheckout();
+        telaAnteriorEspecialista = null;
+        window.scrollTo(0, 0);
+    }
+
+    const btnEspecialista = document.getElementById('btnEspecialista');
+    if (btnEspecialista) btnEspecialista.addEventListener('click', falarComEspecialista);
+
+    ['btnVoltarEspecialista', 'btnEntendiEspecialista'].forEach(id => {
+        const botao = document.getElementById(id);
+        if (botao) botao.addEventListener('click', voltarDoEspecialista);
     });
 
-    let step4State = 'estados';
-    let selectedEstado = '';
-    let selectedCidade = '';
-    let selectedEndereco = null;
-    let isGlobalSearch = false;
-
-    const breadcrumbCard = document.getElementById('breadcrumbCard');
-    const breadcrumbTitle = document.getElementById('breadcrumbTitle');
-    const breadcrumbBack = document.getElementById('breadcrumbBack');
-    const breadcrumbClose = document.getElementById('breadcrumbClose');
-    
-    const enderecosTitle = document.getElementById('enderecosTitle');
-    const searchWrapper = document.getElementById('searchWrapper');
-    const searchInput = document.getElementById('searchInput');
-    const enderecosList = document.getElementById('enderecosList');
-    
-    const mapView = document.getElementById('mapView');
-    const mapTitle = document.getElementById('mapTitle');
-    const mapAddress = document.getElementById('mapAddress');
-    const mapPhone = document.getElementById('mapPhone');
-    const mapPlaceholderText = document.getElementById('mapPlaceholderText');
-
-    function renderList(filter = '') {
-        enderecosList.innerHTML = '';
-        isGlobalSearch = filter.trim().length > 0;
-
-        let data = [];
-        
-        if (isGlobalSearch) {
-            breadcrumbCard.style.display = 'none';
-            enderecosTitle.style.display = 'block';
-            enderecosTitle.textContent = 'Resultados da busca';
-            mapView.style.display = 'none';
-            enderecosList.style.display = 'flex';
-            
-            data = allDataFlattened.filter(e => e.label.toLowerCase().includes(filter.toLowerCase()));
-            
-            data.forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'endereco-card';
-                let tag = item.type === 'estado' ? 'Estado' : (item.type === 'cidade' ? item.refEstado : item.refCidade);
-                
-                let inner = '<div style="display: flex; flex-direction: column; gap: 4px;">';
-                inner += '<span class="endereco-card-text" style="color: #262626; font-weight: 500;">' + item.label + '</span>';
-                inner += '<span class="endereco-card-text" style="font-size: 12px;">' + tag + '</span>';
-                inner += '</div><img src="assets/icon-chevron-right.svg" style="width: 16px; height: 16px;">';
-                
-                card.innerHTML = inner;
-                card.addEventListener('click', () => {
-                    selectedEstado = item.refEstado;
-                    selectedCidade = item.refCidade || '';
-                    if (item.type === 'estado') {
-                        step4State = 'cidades';
-                    } else if (item.type === 'cidade') {
-                        step4State = 'enderecos';
-                    } else if (item.type === 'endereco') {
-                        selectedEndereco = item;
-                        step4State = 'mapa';
-                    }
-                    if (searchInput) searchInput.value = '';
-                    renderList();
-                });
-                enderecosList.appendChild(card);
-            });
-            return;
-        }
-
-        if (step4State === 'estados') {
-            breadcrumbCard.style.display = 'none';
-            enderecosTitle.style.display = 'block';
-            enderecosTitle.textContent = 'Selecione o Estado';
-            searchWrapper.style.display = 'flex';
-            enderecosList.style.display = 'flex';
-            mapView.style.display = 'none';
-            data = estados.map(e => ({ type: 'estado', label: e }));
-            
-        } else if (step4State === 'cidades') {
-            breadcrumbCard.style.display = 'flex';
-            breadcrumbBack.style.display = 'none';
-            breadcrumbTitle.textContent = selectedEstado;
-            enderecosTitle.style.display = 'block';
-            enderecosTitle.textContent = 'Selecione a Cidade';
-            searchWrapper.style.display = 'flex';
-            enderecosList.style.display = 'flex';
-            mapView.style.display = 'none';
-            const raw = cidadesFake[selectedEstado] || cidadesFake['default'];
-            data = raw.map(e => ({ type: 'cidade', label: e }));
-            
-        } else if (step4State === 'enderecos') {
-            breadcrumbCard.style.display = 'flex';
-            breadcrumbBack.style.display = 'block';
-            breadcrumbTitle.textContent = selectedEstado + ' / ' + selectedCidade;
-            enderecosTitle.style.display = 'block';
-            enderecosTitle.textContent = 'Selecione a Unidade';
-            searchWrapper.style.display = 'flex';
-            enderecosList.style.display = 'flex';
-            mapView.style.display = 'none';
-            const raw = enderecosFake[selectedCidade] || enderecosFake['default'];
-            data = raw.map(e => ({ type: 'endereco', label: e.nome, address: e.address, phone: e.phone }));
-            
-        } else if (step4State === 'mapa') {
-            breadcrumbCard.style.display = 'flex';
-            breadcrumbBack.style.display = 'block';
-            breadcrumbTitle.textContent = selectedEstado + ' / ' + selectedCidade;
-            enderecosTitle.style.display = 'none';
-            searchWrapper.style.display = 'none';
-            enderecosList.style.display = 'none';
-            mapView.style.display = 'flex';
-            mapTitle.textContent = selectedEndereco.label;
-            mapAddress.innerHTML = selectedEndereco.address.replace(/\n/g, '<br>');
-            mapPhone.textContent = selectedEndereco.phone;
-            return;
-        }
-
-        data.forEach(item => {
-            const card = document.createElement('div');
-            card.className = 'endereco-card';
-            
-            if (item.type === 'endereco') {
-                let inner = '<div style="display: flex; flex-direction: column; gap: 4px;">';
-                inner += '<span class="endereco-card-text" style="color: #262626; font-weight: 500;">' + item.label + '</span>';
-                inner += '<span class="endereco-card-text" style="font-size: 12px;">' + item.address.split('\n')[0] + '</span>';
-                inner += '</div><img src="assets/icon-chevron-right.svg" style="width: 16px; height: 16px;">';
-                card.innerHTML = inner;
-            } else {
-                card.innerHTML = '<span class="endereco-card-text">' + item.label + '</span>';
-            }
-
-            card.addEventListener('click', () => {
-                if (item.type === 'estado') {
-                    selectedEstado = item.label;
-                    step4State = 'cidades';
-                } else if (item.type === 'cidade') {
-                    selectedCidade = item.label;
-                    step4State = 'enderecos';
-                } else if (item.type === 'endereco') {
-                    selectedEndereco = item;
-                    step4State = 'mapa';
-                }
-                if (searchInput) searchInput.value = '';
-                renderList();
-            });
-            enderecosList.appendChild(card);
-        });
-    }
-
-    if (breadcrumbBack) {
-        breadcrumbBack.addEventListener('click', () => {
-            if (step4State === 'mapa') step4State = 'enderecos';
-            else if (step4State === 'enderecos') step4State = 'cidades';
-            if (searchInput) searchInput.value = '';
-            renderList();
-        });
-    }
-
-    if (breadcrumbClose) {
-        breadcrumbClose.addEventListener('click', () => {
-            step4State = 'estados';
-            if (searchInput) searchInput.value = '';
-            renderList();
-        });
-    }
-
-    if (btnEspecialista) {
-        const newBtn = btnEspecialista.cloneNode(true);
-        btnEspecialista.parentNode.replaceChild(newBtn, btnEspecialista);
-        newBtn.addEventListener('click', () => {
-            document.getElementById('step3').style.display = 'none';
-            globalHeader.style.display = 'none';
-            step4Header.style.display = 'flex';
-            step4.style.display = 'flex';
-            window.scrollTo(0, 0);
-            step4State = 'estados';
-            if (searchInput) searchInput.value = '';
-            renderList();
-        });
-    }
-
-    if (btnBackToStep3) {
-        btnBackToStep3.addEventListener('click', () => {
-            step4.style.display = 'none';
-            step4Header.style.display = 'none';
-            globalHeader.style.display = 'flex';
-            document.getElementById('step3').style.display = 'flex';
-        });
-    }
-
-    if (searchInput) {
-        const newSearch = searchInput.cloneNode(true);
-        searchInput.parentNode.replaceChild(newSearch, searchInput);
-        newSearch.addEventListener('input', (e) => {
-            renderList(e.target.value);
-        });
-    }
 // === Etapa 5: Checkout 100% Digital ===
     const btnContratar = document.getElementById('btnContratar');
     const checkoutHeader = document.getElementById('checkoutHeader');
@@ -972,6 +731,12 @@ document.addEventListener('DOMContentLoaded', () => { try {
         const naRevisao = etapas[indice].dataset.etapa === 'revisao';
         if (naRevisao) montarRevisao();
         if (rodapeChecks) rodapeChecks.hidden = !naRevisao;
+
+        // O valor da parcela so aparece no rodape da tela do cartao
+        const rodapeParcela = document.getElementById('rodapeParcela');
+        if (rodapeParcela) {
+            rodapeParcela.hidden = etapas[indice].dataset.etapa !== 'cartao';
+        }
 
         const rotulo = document.getElementById('progressoTexto');
         if (rotulo) {
@@ -1237,7 +1002,7 @@ document.addEventListener('DOMContentLoaded', () => { try {
     // === Tela de revisao ===
     // Total de telas do checkout inteiro: 9 da fase 1 + revisao + meio de
     // pagamento + pagar + confirmacao. A barra e continua e nunca reseta.
-    const TOTAL_TELAS_CHECKOUT = 13;
+    const TOTAL_TELAS_CHECKOUT = 14;
 
     // 'etapa' aponta para onde o toque leva. 'step2' e a tela de dados iniciais.
     const CAMPOS_REVISAO = [
@@ -1289,7 +1054,13 @@ document.addEventListener('DOMContentLoaded', () => { try {
             valor.className = 'revisao-valor';
             valor.textContent = campo.valor() || '';
 
-            item.append(rotulo, valor);
+            // O lapis e decorativo: a linha inteira ja e o botao de editar.
+            const lapis = document.createElement('img');
+            lapis.className = 'revisao-editar';
+            lapis.src = 'assets/icon-edit.svg';
+            lapis.alt = '';
+
+            item.append(rotulo, valor, lapis);
             item.addEventListener('click', () => editarCampo(campo.etapa));
             revisaoLista.appendChild(item);
         });
@@ -1391,11 +1162,33 @@ document.addEventListener('DOMContentLoaded', () => { try {
         requestAnimationFrame(passo);
     }
 
+    // O fluxo deixa de ser linear a partir do pagamento: Pix vai para o QR,
+    // cartao vai para o formulario. Por isso navegamos pelo nome da etapa,
+    // nao por "indice + 1".
+    function indiceDaEtapa(nome) {
+        return etapas.findIndex(s => s.dataset.etapa === nome);
+    }
+
+    function irParaEtapaNomeada(nome) {
+        const destino = indiceDaEtapa(nome);
+        if (destino >= 0) irParaEtapa(destino);
+    }
+
     function gerarCodigoPix() {
         const botao = document.getElementById('btnNextCheckout');
         animarBotaoProgresso(botao, {
             viraCirculo: true,
-            aoTerminar: () => irParaEtapa(etapaAtual + 1)
+            aoTerminar: () => irParaEtapaNomeada('pix')
+        });
+    }
+
+    // Mesma animacao do Pix, com outro rotulo e outro destino.
+    function processarCartao() {
+        const botao = document.getElementById('btnNextCheckout');
+        animarBotaoProgresso(botao, {
+            texto: 'Processando pagamento',
+            viraCirculo: true,
+            aoTerminar: () => irParaEtapaNomeada('conclusao')
         });
     }
 
@@ -1535,8 +1328,13 @@ document.addEventListener('DOMContentLoaded', () => { try {
             if (modoEdicao) { voltarParaRevisao(); return; }
 
             const secao = etapas[etapaAtual];
-            if (secao.dataset.etapa === 'pagamento' && window.appData.pagamento === 'PIX') {
-                gerarCodigoPix();
+            if (secao.dataset.etapa === 'pagamento') {
+                if (window.appData.pagamento === 'Pix') gerarCodigoPix();
+                else irParaEtapaNomeada('cartao');
+                return;
+            }
+            if (secao.dataset.etapa === 'cartao') {
+                processarCartao();
                 return;
             }
 
@@ -1547,6 +1345,12 @@ document.addEventListener('DOMContentLoaded', () => { try {
     if (btnBackToStep3FromCheckout) {
         btnBackToStep3FromCheckout.addEventListener('click', () => {
             if (modoEdicao) { voltarParaRevisao(); return; }
+            // O QR do Pix vem do pagamento, nao da tela do cartao que o
+            // antecede na ordem do HTML.
+            if (etapas[etapaAtual].dataset.etapa === 'pix') {
+                irParaEtapaNomeada('pagamento');
+                return;
+            }
             irParaEtapa(etapaAtual - 1);
         });
     }
@@ -1607,17 +1411,6 @@ document.addEventListener('DOMContentLoaded', () => { try {
     const btnAccordionPropostas = document.getElementById('btnAccordionPropostas');
 
     // Saidas do checkout usadas por varios botoes
-    function irParaUnidades() {
-        sairDoCheckout();
-        checkoutStep1.style.display = 'none';
-        checkoutHeader.style.display = 'none';
-        document.getElementById('step4Header').style.display = 'flex';
-        document.getElementById('step4').style.display = 'flex';
-        window.scrollTo(0, 0);
-        const btnEspecialista = document.getElementById('btnEspecialista');
-        if (btnEspecialista) btnEspecialista.click(); // Reaproveita a lógica existente
-    }
-
     function irParaPropostas() {
         sairDoCheckout();
         checkoutStep1.style.display = 'none';
@@ -1628,13 +1421,13 @@ document.addEventListener('DOMContentLoaded', () => { try {
     }
 
     if (btnAccordionUnidade) {
-        btnAccordionUnidade.addEventListener('click', irParaUnidades);
+        btnAccordionUnidade.addEventListener('click', falarComEspecialista);
     }
 
     // Mesmos destinos nas telas do PIX e da conclusao
     [
-        ['btnPixEspecialista', irParaUnidades],
-        ['btnConclusaoEspecialista', irParaUnidades],
+        ['btnPixEspecialista', falarComEspecialista],
+        ['btnConclusaoEspecialista', falarComEspecialista],
         ['btnPixPropostas', irParaPropostas],
         ['btnConclusaoPropostas', irParaPropostas]
     ].forEach(([id, acao]) => {

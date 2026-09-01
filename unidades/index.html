@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#FFFFFF">
+    <title>Ademicon - Unidades</title>
+    <!-- Reaproveita o design system do simulador: tipografia, cores e os
+         estilos .step4-*, .search-wrapper e .enderecos-list ja moram la. -->
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <div class="mobile-container">
+        <header class="top-navbar">
+            <button type="button" class="icon-button" aria-label="Voltar" id="btnVoltarUnidades">
+                <img src="../assets/icon-arrow-left.svg" alt="">
+            </button>
+            <span style="font-size: 16px; font-weight: 700; color: var(--color-text-dark);">Unidades</span>
+            <div style="width: 36px;"></div>
+        </header>
+
+        <main id="step4" class="main-content" style="background-color: var(--color-bg-white);">
+            <div class="step4-content">
+                <div class="step4-intro">
+                    <h2 class="step4-title">Procure um especialista</h2>
+                    <p class="step4-desc">São 300 lojas localizadas em 24 Estados e o Distrito Federal. Encontre a Ademicon mais próxima e entre em contato para solicitar a contratação.</p>
+                </div>
+
+                <!-- Trilha de navegação: aparece a partir do estado escolhido -->
+                <div id="breadcrumbCard" class="step4-enderecos" style="display: none; flex: none; padding: 16px 24px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <img src="../assets/icon-arrow-left.svg" id="breadcrumbBack" alt="Voltar" style="cursor: pointer; display: none;">
+                            <h3 id="breadcrumbTitle" style="font-size: 16px; font-weight: 500; color: #525252; margin: 0;">Paraná</h3>
+                        </div>
+                        <img src="../assets/icon-close.svg" alt="Fechar" id="breadcrumbClose" style="cursor: pointer; width: 24px; height: 24px;">
+                    </div>
+                </div>
+
+                <!-- Card principal: busca + lista, ou o detalhe da unidade -->
+                <div id="mainSearchCard" class="step4-enderecos">
+                    <h3 id="enderecosTitle" style="margin: 0;">Selecione o Estado</h3>
+                    <div class="search-wrapper" id="searchWrapper">
+                        <img src="../assets/icon-search.svg" alt="Buscar">
+                        <input type="text" id="searchInput" placeholder="Buscar">
+                    </div>
+
+                    <div class="enderecos-list" id="enderecosList">
+                        <!-- Itens renderizados pelo unidades.js -->
+                    </div>
+
+                    <div id="mapView" style="display: none; flex-direction: column; gap: 16px;">
+                        <div>
+                            <h3 id="mapTitle" style="font-size: 20px; font-weight: 600; color: #262626; margin: 0;">Ahú</h3>
+                            <p id="mapAddress" style="font-size: 14px; color: #525252; margin-top: 8px; line-height: 20px;">Endereço aqui</p>
+                            <p id="mapPhone" style="font-size: 20px; font-weight: 600; color: #262626; margin-top: 16px;">(00) 0000-0000</p>
+                        </div>
+                        <div id="mapImageContainer" style="width: 100%; height: 300px; background-color: #E5E5E5; border-radius: 8px; overflow: hidden; background-image: url('../assets/map-image.png'); background-size: cover; background-position: center;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="unidades.js?v=1787602000000"></script>
+</body>
+</html>

@@ -645,6 +645,11 @@ textarea {
     color: var(--color-text-dark);
 }
 
+/* So o nome do documento em destaque; o "Aceito os" segue na cor do rotulo. */
+.checkbox-destaque {
+    color: var(--color-primary);
+}
+
 .btn-disabled {
     opacity: 0.25;
     cursor: not-allowed;
@@ -1471,23 +1476,23 @@ html.checkout-ativo .mobile-container {
     color: var(--color-text-light);
 }
 
+/* Sem gap: o espacamento entre as linhas vem do padding de cada item,
+   para o divider de baixo encostar na linha seguinte (Figma 7075:2638). */
 .revisao-lista {
     display: flex;
     flex-direction: column;
-    gap: 16px;
 }
 
 /* Cada linha e um botao: tocar leva para a tela daquele dado */
 .revisao-item {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 8px;
     width: 100%;
-    padding: 8px;
-    margin: -8px;
+    padding: 12px 0;
     background: none;
     border: none;
-    border-radius: 8px;
+    border-bottom: 1px solid #D4D4D8;
     text-align: left;
     font-family: inherit;
     cursor: pointer;
@@ -1500,12 +1505,20 @@ html.checkout-ativo .mobile-container {
     outline: none;
 }
 
+/* O Figma usa 87px, mas la o rotulo mais longo e "Telefone". Aqui a lista
+   tem "Complemento", que mede 101px e transbordava por cima do valor. */
 .revisao-rotulo {
     flex: none;
-    width: 124px;
+    width: 104px;
     font-size: 14px;
     line-height: 20px;
     color: var(--color-text-muted);
+}
+
+.revisao-editar {
+    flex: none;
+    width: 16px;
+    height: 16px;
 }
 
 .revisao-valor {
@@ -1520,6 +1533,87 @@ html.checkout-ativo .mobile-container {
     content: "—";
     font-weight: 400;
     color: var(--color-text-light);
+}
+
+/* === Contato com especialista (Figma 7489:2206) ===
+   Bloco centralizado na altura da tela, com a imagem em cima e o botao
+   colado embaixo. */
+.especialista-conteudo {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 24px;
+    padding: 32px 16px 16px;
+    background-color: var(--color-bg-main);
+}
+
+.especialista-bloco {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 32px;
+}
+
+.especialista-img {
+    width: 100%;
+    height: 231px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.especialista-textos {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.especialista-titulo {
+    margin: 0;
+    font-size: 20px;
+    line-height: 28px;
+    font-weight: 600;
+    color: var(--color-text-dark);
+}
+
+.especialista-apoio {
+    margin: 0;
+    font-size: 14px;
+    line-height: 20px;
+    color: var(--color-text-muted);
+}
+
+/* --- Cartao de credito (Figma 7551:3034) --- */
+.cartao-campos {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Vencimento e CVC dividem a linha em partes iguais */
+.cartao-dupla {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.cartao-dupla > .checkout-campo {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Linha da parcela acima do botao, so na tela do cartao */
+.rodape-parcela {
+    margin: 0 0 24px 0;
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 600;
+    color: var(--color-text-muted);
+}
+
+.rodape-parcela[hidden] {
+    display: none;
 }
 
 /* --- Checks do rodape (so na revisao) --- */
@@ -1565,11 +1659,11 @@ html.checkout-ativo .mobile-container {
     display: none;
 }
 
-/* --- Geracao do codigo PIX --- */
-/* A barra de progresso e o proprio botao: base escura e um preenchimento
-   claro que cresce da esquerda para a direita, como no Figma. */
+/* --- Geracao do codigo Pix --- */
+/* A barra de progresso e o proprio botao: o fundo fica #F36E65 e o
+   preenchimento #EE3124 cresce por cima, da esquerda para a direita. */
 .btn-primary.carregando {
-    background-color: var(--color-danger-dark);
+    background-color: #F36E65;
     background-image: linear-gradient(var(--color-primary), var(--color-primary));
     background-repeat: no-repeat;
     background-size: var(--preenchimento, 0%) 100%;
