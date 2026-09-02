@@ -115,25 +115,31 @@
                                    autocapitalize="words" enterkeyhint="next"
                                    aria-describedby="nomeErro">
                         </div>
-                        <p class="campo-erro-msg" id="nomeErro" role="alert" hidden>Por favor, informe seu nome completo</p>
+                        <p class="campo-erro-msg" id="nomeErro" role="alert" hidden>Digite o nome completo</p>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">E-mail</label>
-                        <div class="input-wrapper">
-                            <input type="email" class="input-field" placeholder="Ex: joao@email.com" enterkeyhint="next">
+                        <label class="form-label" for="email">E-mail</label>
+                        <div class="input-wrapper" id="emailWrapper">
+                            <input type="email" class="input-field" id="email" placeholder="Ex: joao@email.com"
+                                   autocomplete="email" enterkeyhint="next" aria-describedby="emailErro">
                         </div>
+                        <p class="campo-erro-msg" id="emailErro" role="alert" hidden>E-mail inválido</p>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">CPF</label>
-                        <div class="input-wrapper">
-                            <input type="text" class="input-field" id="cpf" placeholder="000.000.000-00" maxlength="14" enterkeyhint="next">
+                        <label class="form-label" for="cpf">CPF</label>
+                        <div class="input-wrapper" id="cpfWrapper">
+                            <input type="text" class="input-field" id="cpf" placeholder="000.000.000-00"
+                                   inputmode="numeric" maxlength="14" enterkeyhint="next" aria-describedby="cpfErro">
                         </div>
+                        <p class="campo-erro-msg" id="cpfErro" role="alert" hidden>CPF inválido</p>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Telefone</label>
-                        <div class="input-wrapper">
-                            <input type="tel" class="input-field" id="telefone" placeholder="(00) 00000-0000" maxlength="15" enterkeyhint="done">
+                        <label class="form-label" for="telefone">Telefone</label>
+                        <div class="input-wrapper" id="telefoneWrapper">
+                            <input type="tel" class="input-field" id="telefone" placeholder="(00) 00000-0000"
+                                   inputmode="numeric" maxlength="15" enterkeyhint="done" aria-describedby="telefoneErro">
                         </div>
+                        <p class="campo-erro-msg" id="telefoneErro" role="alert" hidden>Telefone inválido</p>
                     </div>
 
                     <!-- Cards Informativos -->
@@ -294,8 +300,8 @@
 
             <!-- Footer Botoes -->
             <div class="step3-footer">
-                <button type="button" class="btn-primary" id="btnContratar">Contratar 100% digital</button>
                 <button type="button" class="btn-secondary" id="btnEspecialista">Falar com especialista</button>
+                <button type="button" class="btn-primary" id="btnContratar">Contratar 100% digital</button>
             </div>
         </main>
 
@@ -411,9 +417,10 @@
                 <h2 class="checkout-titulo">Ótima escolha!<br>Vamos iniciar seu contrato.</h2>
                 <div class="checkout-campo">
                     <h3 class="checkout-label">Confirme seu CPF</h3>
-                    <div class="input-wrapper">
-                        <input type="text" class="input-field" id="checkoutCpf" data-autofoco placeholder="000.000.000-00" inputmode="numeric" maxlength="14" enterkeyhint="next">
+                    <div class="input-wrapper" id="checkoutCpfWrapper">
+                        <input type="text" class="input-field" id="checkoutCpf" aria-describedby="checkoutCpfErro" data-autofoco placeholder="000.000.000-00" inputmode="numeric" maxlength="14" enterkeyhint="next">
                     </div>
+                    <p class="campo-erro-msg" id="checkoutCpfErro" role="alert" hidden>CPF inválido</p>
                     <div class="info-card" style="margin-top: 0;">
                         <img src="assets/info-security.png" alt="" class="info-card-img">
                         <div class="info-card-content">
@@ -429,9 +436,10 @@
                 <h2 class="checkout-titulo">Vamos precisar de mais alguns dados.</h2>
                 <div class="checkout-campo">
                     <h3 class="checkout-label">Sua data de nascimento</h3>
-                    <div class="input-wrapper">
-                        <input type="text" class="input-field" id="checkoutNascimento" data-autofoco placeholder="dd/mm/aaaa" inputmode="numeric" maxlength="10" enterkeyhint="next">
+                    <div class="input-wrapper" id="nascimentoWrapper">
+                        <input type="text" class="input-field" id="checkoutNascimento" aria-describedby="nascimentoErro" data-autofoco placeholder="dd/mm/aaaa" inputmode="numeric" maxlength="10" enterkeyhint="next">
                     </div>
+                    <p class="campo-erro-msg" id="nascimentoErro" role="alert" hidden>Data inválida</p>
                 </div>
             </section>
 
@@ -552,9 +560,11 @@
                 <h2 class="checkout-titulo">Agora vamos cadastrar seu endereço.</h2>
                 <div class="checkout-campo">
                     <h3 class="checkout-label">Digite seu CEP</h3>
-                    <div class="input-wrapper">
-                        <input type="text" class="input-field" id="checkoutCep" data-autofoco placeholder="00000-000" inputmode="numeric" maxlength="9" enterkeyhint="next">
+                    <div class="input-wrapper" id="cepWrapper">
+                        <input type="text" class="input-field" id="checkoutCep" data-autofoco placeholder="00000-000"
+                               inputmode="numeric" maxlength="9" enterkeyhint="next" aria-describedby="cepInvalido">
                     </div>
+                    <p class="campo-erro-msg" id="cepInvalido" role="alert" hidden>CEP inválido</p>
                     <p class="campo-erro" id="cepErro" hidden></p>
                 </div>
             </section>
@@ -565,9 +575,10 @@
                 <div class="checkout-campo">
                     <p class="endereco-resumo" id="resumoNumero"></p>
                     <h3 class="checkout-label">Qual o número?</h3>
-                    <div class="input-wrapper">
-                        <input type="text" class="input-field" id="checkoutNumero" data-autofoco placeholder="Digite o número da residência" inputmode="numeric" maxlength="10" enterkeyhint="next">
+                    <div class="input-wrapper" id="numeroWrapper">
+                        <input type="text" class="input-field" id="checkoutNumero" aria-describedby="numeroErro" data-autofoco placeholder="Digite o número da residência" inputmode="numeric" maxlength="10" enterkeyhint="next">
                     </div>
+                    <p class="campo-erro-msg" id="numeroErro" role="alert" hidden>Informe o número ou S/N</p>
                 </div>
             </section>
 
@@ -634,47 +645,52 @@
                 <div class="cartao-campos">
                     <div class="checkout-campo">
                         <label class="form-label" for="cartaoNumero">Número</label>
-                        <div class="input-wrapper">
-                            <input type="text" class="input-field" id="cartaoNumero"
+                        <div class="input-wrapper" id="cartaoNumeroWrapper">
+                            <input type="text" class="input-field" id="cartaoNumero" aria-describedby="cartaoNumeroErro"
                                    placeholder="0000 0000 0000 0000" inputmode="numeric"
                                    autocomplete="cc-number" maxlength="19" data-autofoco>
                         </div>
+                        <p class="campo-erro-msg" id="cartaoNumeroErro" role="alert" hidden>Número do cartão inválido</p>
                     </div>
 
                     <div class="cartao-dupla">
                         <div class="checkout-campo">
                             <label class="form-label" for="cartaoVencimento">Vencimento</label>
-                            <div class="input-wrapper">
-                                <input type="text" class="input-field" id="cartaoVencimento"
+                            <div class="input-wrapper" id="cartaoVencWrapper">
+                                <input type="text" class="input-field" id="cartaoVencimento" aria-describedby="cartaoVencErro"
                                        placeholder="00/00" inputmode="numeric"
                                        autocomplete="cc-exp" maxlength="5">
                             </div>
+                            <p class="campo-erro-msg" id="cartaoVencErro" role="alert" hidden>Vencimento inválido</p>
                         </div>
                         <div class="checkout-campo">
                             <label class="form-label" for="cartaoCvc">CVC</label>
-                            <div class="input-wrapper">
-                                <input type="text" class="input-field" id="cartaoCvc"
+                            <div class="input-wrapper" id="cartaoCvcWrapper">
+                                <input type="text" class="input-field" id="cartaoCvc" aria-describedby="cartaoCvcErro"
                                        placeholder="000" inputmode="numeric"
                                        autocomplete="cc-csc" maxlength="4">
                             </div>
+                            <p class="campo-erro-msg" id="cartaoCvcErro" role="alert" hidden>CVC inválido</p>
                         </div>
                     </div>
 
                     <div class="checkout-campo">
                         <label class="form-label" for="cartaoNome">Nome (igual ao cartão)</label>
-                        <div class="input-wrapper">
-                            <input type="text" class="input-field" id="cartaoNome"
+                        <div class="input-wrapper" id="cartaoNomeWrapper">
+                            <input type="text" class="input-field" id="cartaoNome" aria-describedby="cartaoNomeErro"
                                    placeholder="Ex: JOAO C SILVA" autocomplete="cc-name"
                                    autocapitalize="characters">
                         </div>
+                        <p class="campo-erro-msg" id="cartaoNomeErro" role="alert" hidden>Digite o nome como está no cartão</p>
                     </div>
 
                     <div class="checkout-campo">
                         <label class="form-label" for="cartaoCpf">CPF</label>
-                        <div class="input-wrapper">
-                            <input type="text" class="input-field" id="cartaoCpf"
+                        <div class="input-wrapper" id="cartaoCpfWrapper">
+                            <input type="text" class="input-field" id="cartaoCpf" aria-describedby="cartaoCpfErro"
                                    placeholder="000.000.000-00" inputmode="numeric" maxlength="14">
                         </div>
+                        <p class="campo-erro-msg" id="cartaoCpfErro" role="alert" hidden>CPF inválido</p>
                     </div>
                 </div>
 
@@ -887,6 +903,6 @@
     </main>
 
 </div>
-    <script src="script.js?v=1788273600000"></script>
+    <script src="script.js?v=1788360000000"></script>
     </body>
 </html>

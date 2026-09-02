@@ -295,13 +295,11 @@ document.addEventListener('DOMContentLoaded', () => { try {
     const step2Inputs = document.querySelectorAll(".step2-form .input-field");
     const btnProximaEtapa = document.getElementById("btnProximaEtapa");
 
-    // === Nome completo: exige sobrenome ===
-    // Uma palavra so e o primeiro nome. O contrato do consorcio precisa do
-    // nome civil inteiro, entao pedimos o resto antes de seguir.
-    const campoNome = document.getElementById('nomeCompleto');
-    const nomeWrapper = document.getElementById('nomeWrapper');
-    const nomeErro = document.getElementById('nomeErro');
-
+    // === Validacao dos campos ===
+    // O erro aparece so quando o usuario sai do campo: quem esta digitando
+    // "Joao Carlos" ou "joao@email.com" passa por estados invalidos no
+    // caminho e nao merece um alerta. Corrigiu enquanto digita, o erro sai.
+    // Nada disso trava o avanco: o cliente precisa percorrer o fluxo inteiro.
     function partesDoNome(texto) {
         return String(texto).trim().split(/\s+/).filter(p => p.length > 0);
     }
@@ -313,28 +311,164 @@ document.addEventListener('DOMContentLoaded', () => { try {
         return partes[partes.length - 1].length >= 2;
     }
 
-    function marcarErroNome(mostrar) {
-        nomeWrapper.classList.toggle('campo-erro', mostrar);
-        nomeErro.hidden = !mostrar;
+    function emailValido(texto) {
+        // Basta ter algo@algo.algo - validacao de e-mail de verdade e o
+        // envio de uma confirmacao, nao uma expressao regular.
+        return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(texto).trim());
     }
 
-    // O erro aparece so quando o usuario sai do campo: quem esta digitando
-    // "Joao Carlos" passa por "Joao" no caminho e nao merece um alerta.
-    campoNome.addEventListener('blur', () => {
-        // So limpa espacos sobrando; a caixa fica como o usuario escreveu,
-        // porque nome proprio tem grafia que nenhuma regra automatica acerta
-        // sempre (d'Avila, McCarthy, di Napoli).
-        const texto = partesDoNome(campoNome.value).join(' ');
-        campoNome.value = texto;
-        marcarErroNome(texto.length > 0 && !nomeEstaCompleto(texto));
-    });
+    // CPF de verdade, com os dois digitos verificadores.
+    function cpfValido(texto) {
+        const d = String(texto).replace(/\D/g, '');
+        if (d.length !== 11) return false;
+        if (/^(\d)\1{10}$/.test(d)) return false; // 000.000.000-00 e afins
 
-    // Ja corrigiu enquanto digita? O erro sai na hora.
-    campoNome.addEventListener('input', () => {
-        if (nomeWrapper.classList.contains('campo-erro') && nomeEstaCompleto(campoNome.value)) {
-            marcarErroNome(false);
+        function digito(ate, pesoInicial) {
+            let soma = 0;
+            for (let i = 0; i < ate; i++) {
+                soma += parseInt(d.charAt(i), 10) * (pesoInicial - i);
+            }
+            const resto = (soma * 10) % 11;
+            return resto === 10 ? 0 : resto;
         }
-    });
+
+        return digito(9, 10) === parseInt(d.charAt(9), 10) &&
+               digito(10, 11) === parseInt(d.charAt(10), 10);
+    }
+
+    function telefoneValido(texto) {
+        const d = String(texto).replace(/\D/g, '');
+        if (d.length !== 10 && d.length !== 11) return false;
+        if (parseInt(d.slice(0, 2), 10) < 11) return false;          // DDD nao existe abaixo de 11
+        if (d.length === 11 && d.charAt(2) !== '9') return false;    // celular comeca com 9
+        if (d.length === 10 && parseInt(d.charAt(2), 10) < 2) return false; // fixo nao comeca com 0 ou 1
+        return true;
+    }
+
+    function cepValido(texto) {
+        const d = String(texto).replace(/\D/g, '');
+        return d.length === 8 && !/^(\d)\1{7}$/.test(d);
+    }
+
+    // Data real, no passado, de alguem com 18 anos ou mais - idade minima
+    // para assinar contrato de consorcio.
+    function nascimentoValido(texto) {
+        const d = String(texto).replace(/\D/g, '');
+        if (d.length !== 8) return false;
+
+        const dia = parseInt(d.slice(0, 2), 10);
+        const mes = parseInt(d.slice(2, 4), 10);
+        const ano = parseInt(d.slice(4, 8), 10);
+        if (mes < 1 || mes > 12 || dia < 1 || ano < 1900) return false;
+
+        const data = new Date(ano, mes - 1, dia);
+        // Rejeita 31/02: o Date rola para marco e o dia deixa de bater.
+        if (data.getDate() !== dia || data.getMonth() !== mes - 1) return false;
+
+        const hoje = new Date();
+        const maioridade = new Date(ano + 18, mes - 1, dia);
+        return data < hoje && maioridade <= hoje;
+    }
+
+    // Numero da casa: aceita "S/N" de quem nao tem numero.
+    function numeroValido(texto) {
+        const limpo = String(texto).trim();
+        if (/^s\/?n$/i.test(limpo)) return true;
+        return /\d/.test(limpo) && limpo.length <= 10;
+    }
+
+    // Algoritmo de Luhn - o mesmo que a operadora usa antes de enviar.
+    function cartaoValido(texto) {
+        const d = String(texto).replace(/\D/g, '');
+        if (d.length < 13 || d.length > 19) return false;
+
+        let soma = 0;
+        let dobra = false;
+        for (let i = d.length - 1; i >= 0; i--) {
+            let n = parseInt(d.charAt(i), 10);
+            if (dobra) {
+                n *= 2;
+                if (n > 9) n -= 9;
+            }
+            soma += n;
+            dobra = !dobra;
+        }
+        return soma % 10 === 0;
+    }
+
+    // MM/AA que ainda nao passou. O cartao vale ate o ultimo dia do mes.
+    function vencimentoValido(texto) {
+        const d = String(texto).replace(/\D/g, '');
+        if (d.length !== 4) return false;
+
+        const mes = parseInt(d.slice(0, 2), 10);
+        if (mes < 1 || mes > 12) return false;
+
+        const ano = 2000 + parseInt(d.slice(2, 4), 10);
+        const hoje = new Date();
+        const ultimoDia = new Date(ano, mes, 0);
+        return ultimoDia >= new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+    }
+
+    function cvcValido(texto) {
+        const d = String(texto).replace(/\D/g, '');
+        return d.length === 3 || d.length === 4;
+    }
+
+    // Liga um campo ao seu aviso: borda vermelha no wrapper e mensagem embaixo.
+    function ligarValidacao(idCampo, idWrapper, idErro, valido) {
+        const campo = document.getElementById(idCampo);
+        const wrapper = document.getElementById(idWrapper);
+        const aviso = document.getElementById(idErro);
+        if (!campo || !wrapper || !aviso) return null;
+
+        function marcar(mostrar) {
+            wrapper.classList.toggle('campo-erro', mostrar);
+            aviso.hidden = !mostrar;
+        }
+
+        campo.addEventListener('blur', () => {
+            const texto = campo.value.trim();
+            marcar(texto.length > 0 && !valido(texto));
+        });
+
+        campo.addEventListener('input', () => {
+            if (wrapper.classList.contains('campo-erro') && valido(campo.value)) marcar(false);
+        });
+
+        return { campo: campo, valido: valido, marcar: marcar };
+    }
+
+    const CAMPOS_VALIDADOS = [
+        ligarValidacao('nomeCompleto', 'nomeWrapper', 'nomeErro', nomeEstaCompleto),
+        ligarValidacao('email', 'emailWrapper', 'emailErro', emailValido),
+        ligarValidacao('cpf', 'cpfWrapper', 'cpfErro', cpfValido),
+        ligarValidacao('telefone', 'telefoneWrapper', 'telefoneErro', telefoneValido),
+        ligarValidacao('checkoutCep', 'cepWrapper', 'cepInvalido', cepValido),
+        // Checkout
+        ligarValidacao('checkoutCpf', 'checkoutCpfWrapper', 'checkoutCpfErro', cpfValido),
+        ligarValidacao('checkoutNascimento', 'nascimentoWrapper', 'nascimentoErro', nascimentoValido),
+        ligarValidacao('checkoutNumero', 'numeroWrapper', 'numeroErro', numeroValido),
+        // Cartao de credito
+        ligarValidacao('cartaoNumero', 'cartaoNumeroWrapper', 'cartaoNumeroErro', cartaoValido),
+        ligarValidacao('cartaoVencimento', 'cartaoVencWrapper', 'cartaoVencErro', vencimentoValido),
+        ligarValidacao('cartaoCvc', 'cartaoCvcWrapper', 'cartaoCvcErro', cvcValido),
+        ligarValidacao('cartaoNome', 'cartaoNomeWrapper', 'cartaoNomeErro', nomeEstaCompleto),
+        ligarValidacao('cartaoCpf', 'cartaoCpfWrapper', 'cartaoCpfErro', cpfValido)
+    ].filter(Boolean);
+
+    // Mostra tudo que estiver errado de uma vez, sem impedir o avanco.
+    // Com "dentro", olha so os campos daquele trecho da tela.
+    function revisarCampos(dentro) {
+        CAMPOS_VALIDADOS
+            .filter(c => !dentro || dentro.contains(c.campo))
+            .forEach(c => {
+                const texto = c.campo.value.trim();
+                c.marcar(texto.length > 0 && !c.valido(texto));
+            });
+    }
+
+    const campoNome = document.getElementById('nomeCompleto');
 
 
     function checkStep2Form() {
@@ -345,7 +479,13 @@ document.addEventListener('DOMContentLoaded', () => { try {
             }
         });
 
-        if (allFilled && nomeEstaCompleto(campoNome.value)) {
+        // O botao apaga quando falta algo ou algo esta invalido, mas o clique
+        // continua passando - ver o listener mais abaixo.
+        const tudoValido = CAMPOS_VALIDADOS
+            .filter(c => c.campo.closest('.step2-form'))
+            .every(c => c.valido(c.campo.value));
+
+        if (allFilled && tudoValido) {
             btnProximaEtapa.classList.remove("btn-disabled");
             // btn-primary já tem a cor vermelha quando não tem btn-disabled
         } else {
@@ -355,6 +495,7 @@ document.addEventListener('DOMContentLoaded', () => { try {
 
     step2Inputs.forEach((input, index) => {
         input.addEventListener("input", checkStep2Form);
+        input.addEventListener("blur", checkStep2Form);
 
         input.addEventListener("keydown", (e) => {
             // No celular, ao apertar 'retorno' / 'Enter'
@@ -452,14 +593,9 @@ document.addEventListener('DOMContentLoaded', () => { try {
 
     if(btnProximaEtapa) {
         btnProximaEtapa.addEventListener('click', () => {
-            // Os outros campos seguem liberados para teste, mas o nome nao
-            // passa pela metade: e ele que vai para o contrato.
-            const nomeDigitado = campoNome.value.trim();
-            if (nomeDigitado.length > 0 && !nomeEstaCompleto(nomeDigitado)) {
-                marcarErroNome(true);
-                campoNome.focus();
-                return;
-            }
+            // Mostra os erros mas deixa passar: o cliente precisa conseguir
+            // percorrer o fluxo inteiro para validar o protótipo.
+            revisarCampos();
 
             capturarEtapa2();
 
@@ -938,6 +1074,9 @@ document.addEventListener('DOMContentLoaded', () => { try {
     async function buscarCep(cep) {
         const digitos = cep.replace(/\D/g, '');
         if (digitos.length !== 8) return;
+        // CEP com formato invalido ja mostra o proprio aviso; nao adianta
+        // consultar o ViaCEP nem empilhar uma segunda mensagem embaixo.
+        if (!cepValido(cep)) return;
 
         if (cepErro) { cepErro.hidden = true; cepErro.textContent = ''; }
 
@@ -949,6 +1088,10 @@ document.addEventListener('DOMContentLoaded', () => { try {
         } catch (e) {
             // offline ou API fora do ar: segue para o exemplo
         }
+
+        // A resposta demora: se o campo ja mudou nesse meio tempo, esta
+        // consulta ficou velha e nao pode escrever por cima do estado atual.
+        if (checkoutCep && checkoutCep.value.replace(/\D/g, '') !== digitos) return;
 
         if (!dados) {
             dados = Object.assign({}, ENDERECO_EXEMPLO);
@@ -971,7 +1114,13 @@ document.addEventListener('DOMContentLoaded', () => { try {
 
     if (checkoutCep) {
         checkoutCep.addEventListener('input', () => {
-            if (checkoutCep.value.replace(/\D/g, '').length === 8) buscarCep(checkoutCep.value);
+            // CEP invalido: limpa o aviso do ViaCEP para nao ficarem duas
+            // mensagens empilhadas embaixo do campo.
+            if (!cepValido(checkoutCep.value)) {
+                if (cepErro) { cepErro.hidden = true; cepErro.textContent = ''; }
+                return;
+            }
+            buscarCep(checkoutCep.value);
         });
     }
 
@@ -1328,6 +1477,8 @@ document.addEventListener('DOMContentLoaded', () => { try {
             if (modoEdicao) { voltarParaRevisao(); return; }
 
             const secao = etapas[etapaAtual];
+            revisarCampos(secao); // mostra o que esta errado, mas deixa passar
+
             if (secao.dataset.etapa === 'pagamento') {
                 if (window.appData.pagamento === 'Pix') gerarCodigoPix();
                 else irParaEtapaNomeada('cartao');
