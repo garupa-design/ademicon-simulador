@@ -317,23 +317,19 @@ document.addEventListener('DOMContentLoaded', () => { try {
         return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(texto).trim());
     }
 
-    // CPF de verdade, com os dois digitos verificadores.
+    // Protótipo: qualquer CPF de 11 digitos passa. Quem esta testando nao
+    // quer digitar o proprio CPF nem procurar um valido, entao a unica coisa
+    // recusada e a sequencia repetida (00000000000, 11111111111...), que
+    // serve de atalho para o cliente ver o estado de erro.
+    //
+    // Em producao isto volta a ser a checagem dos dois digitos verificadores:
+    //   soma dos 9 primeiros x pesos 10..2, resto (soma*10)%11 (10 vira 0)
+    //   deve bater com o 10o digito; idem com os 10 primeiros x pesos 11..2
+    //   para o 11o.
     function cpfValido(texto) {
         const d = String(texto).replace(/\D/g, '');
         if (d.length !== 11) return false;
-        if (/^(\d)\1{10}$/.test(d)) return false; // 000.000.000-00 e afins
-
-        function digito(ate, pesoInicial) {
-            let soma = 0;
-            for (let i = 0; i < ate; i++) {
-                soma += parseInt(d.charAt(i), 10) * (pesoInicial - i);
-            }
-            const resto = (soma * 10) % 11;
-            return resto === 10 ? 0 : resto;
-        }
-
-        return digito(9, 10) === parseInt(d.charAt(9), 10) &&
-               digito(10, 11) === parseInt(d.charAt(10), 10);
+        return !/^(\d)\1{10}$/.test(d);
     }
 
     function telefoneValido(texto) {
@@ -738,6 +734,14 @@ document.addEventListener('DOMContentLoaded', () => { try {
         if (telaAnteriorEspecialista.noCheckout) entrarNoCheckout();
         telaAnteriorEspecialista = null;
         window.scrollTo(0, 0);
+    }
+
+    // Depois do contrato assinado, o atendimento e imediato: vai direto para
+    // o WhatsApp da central, em vez da tela de "vamos entrar em contato".
+    const WHATSAPP_ATENDIMENTO = 'https://api.whatsapp.com/send/?phone=554130232000';
+
+    function abrirWhatsApp() {
+        window.open(WHATSAPP_ATENDIMENTO, '_blank', 'noopener');
     }
 
     const btnEspecialista = document.getElementById('btnEspecialista');
@@ -1578,9 +1582,8 @@ document.addEventListener('DOMContentLoaded', () => { try {
     // Mesmos destinos nas telas do PIX e da conclusao
     [
         ['btnPixEspecialista', falarComEspecialista],
-        ['btnConclusaoEspecialista', falarComEspecialista],
-        ['btnPixPropostas', irParaPropostas],
-        ['btnConclusaoPropostas', irParaPropostas]
+        ['btnConclusaoEspecialista', abrirWhatsApp],
+        ['btnPixPropostas', irParaPropostas]
     ].forEach(([id, acao]) => {
         const botao = document.getElementById(id);
         if (botao) botao.addEventListener('click', acao);
