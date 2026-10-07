@@ -290,6 +290,10 @@ document.addEventListener('DOMContentLoaded', () => { try {
     aplicarMascara(document.getElementById('cartaoVencimento'), mascaraVencimento);
     aplicarMascara(document.getElementById('cartaoCvc'), mascaraNumeros(4));
     aplicarMascara(document.getElementById('cartaoCpf'), mascaraCPF);
+    aplicarMascara(document.getElementById('parcelasNumero'), mascaraCartao);
+    aplicarMascara(document.getElementById('parcelasVencimento'), mascaraVencimento);
+    aplicarMascara(document.getElementById('parcelasCvc'), mascaraNumeros(4));
+    aplicarMascara(document.getElementById('parcelasCpf'), mascaraCPF);
 
     // === Validação da Etapa 2 ===
     const step2Inputs = document.querySelectorAll(".step2-form .input-field");
@@ -450,7 +454,13 @@ document.addEventListener('DOMContentLoaded', () => { try {
         ligarValidacao('cartaoVencimento', 'cartaoVencWrapper', 'cartaoVencErro', vencimentoValido),
         ligarValidacao('cartaoCvc', 'cartaoCvcWrapper', 'cartaoCvcErro', cvcValido),
         ligarValidacao('cartaoNome', 'cartaoNomeWrapper', 'cartaoNomeErro', nomeEstaCompleto),
-        ligarValidacao('cartaoCpf', 'cartaoCpfWrapper', 'cartaoCpfErro', cpfValido)
+        ligarValidacao('cartaoCpf', 'cartaoCpfWrapper', 'cartaoCpfErro', cpfValido),
+        // Cartao das proximas parcelas
+        ligarValidacao('parcelasNumero', 'parcelasNumeroWrapper', 'parcelasNumeroErro', cartaoValido),
+        ligarValidacao('parcelasVencimento', 'parcelasVencWrapper', 'parcelasVencErro', vencimentoValido),
+        ligarValidacao('parcelasCvc', 'parcelasCvcWrapper', 'parcelasCvcErro', cvcValido),
+        ligarValidacao('parcelasNome', 'parcelasNomeWrapper', 'parcelasNomeErro', nomeEstaCompleto),
+        ligarValidacao('parcelasCpf', 'parcelasCpfWrapper', 'parcelasCpfErro', cpfValido)
     ].filter(Boolean);
 
     // Mostra tudo que estiver errado de uma vez, sem impedir o avanco.
@@ -577,7 +587,7 @@ document.addEventListener('DOMContentLoaded', () => { try {
 
     // === Transição Etapa 2 -> Etapa 3 ===
     const step3 = document.getElementById('step3');
-    window.appData = { produto: 'imóvel', nome: '', email: '', cpf: '', telefone: '', nascimento: '', genero: '', estadoCivil: '', renda: '', profissao: '', cep: '', endereco: null, numero: '', complemento: '', semComplemento: false, pagamento: 'Pix' };
+    window.appData = { produto: 'imóvel', nome: '', email: '', cpf: '', telefone: '', nascimento: '', genero: '', estadoCivil: '', renda: '', profissao: '', cep: '', endereco: null, numero: '', complemento: '', semComplemento: false, pagamento: 'Pix', proximasParcelas: 'Boleto' };
 
     function capturarEtapa2() {
         const campos = document.querySelectorAll('.step2-form .input-field');
@@ -850,6 +860,8 @@ document.addEventListener('DOMContentLoaded', () => { try {
 
         limparEstadoPix();
         atualizarResumos();
+        atualizarEmailBoleto();
+        atualizarNotaParcelas();
 
         const secaoAtual = etapas[indice];
 
@@ -1520,6 +1532,50 @@ document.addEventListener('DOMContentLoaded', () => { try {
             }
         });
     }
+
+    // Proximas parcelas: boleto mostra o card do e-mail, cartao mostra o form
+    const btnProximasBoleto = document.getElementById('btnProximasBoleto');
+    const btnProximasCartao = document.getElementById('btnProximasCartao');
+    const parcelasBoleto = document.getElementById('parcelasBoleto');
+    const parcelasCartao = document.getElementById('parcelasCartao');
+
+    // O e-mail do card vem do que a pessoa digitou na Etapa 2; sem isso,
+    // fica o exemplo do Figma para o cliente conseguir avaliar a tela.
+    function atualizarEmailBoleto() {
+        // busca o no na hora: mostrarEtapa pode rodar antes destas consts
+        const alvo = document.getElementById('parcelasEmail');
+        if (!alvo) return;
+        const email = window.appData && window.appData.email ? window.appData.email.trim() : '';
+        alvo.textContent = email || 'emaildocliente@email.com';
+    }
+
+    function aplicarProximasParcelas(modo) {
+        if (!btnProximasBoleto || !btnProximasCartao) return;
+        const noBoleto = modo !== 'Cartão de Crédito';
+        btnProximasBoleto.setAttribute('aria-pressed', noBoleto ? 'true' : 'false');
+        btnProximasCartao.setAttribute('aria-pressed', noBoleto ? 'false' : 'true');
+        if (parcelasBoleto) parcelasBoleto.hidden = !noBoleto;
+        if (parcelasCartao) parcelasCartao.hidden = noBoleto;
+        if (window.appData) window.appData.proximasParcelas = noBoleto ? 'Boleto' : 'Cartão de Crédito';
+        if (noBoleto) atualizarEmailBoleto();
+        atualizarNotaParcelas();
+    }
+
+    // A nota do Pix precisa combinar com a escolha das proximas parcelas
+    function atualizarNotaParcelas() {
+        const nota = document.getElementById('pixNotaParcelas');
+        if (!nota) return;
+        const noCartao = window.appData && window.appData.proximasParcelas === 'Cartão de Crédito';
+        nota.textContent = noCartao
+            ? 'As próximas parcelas serão cobradas no cartão cadastrado.'
+            : 'Os boletos das próximas parcelas serão enviados para o seu e-mail.';
+    }
+
+    [btnProximasBoleto, btnProximasCartao].forEach(botao => {
+        if (!botao) return;
+        botao.addEventListener('click', () => aplicarProximasParcelas(botao.dataset.modo));
+    });
+    aplicarProximasParcelas('Boleto');
 
     document.querySelectorAll('#checkoutStep1 .radio-lista').forEach(lista => {
         sincronizarLista(lista); // aplica o que ja vem marcado no HTML

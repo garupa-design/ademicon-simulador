@@ -453,6 +453,76 @@ textarea {
     box-shadow: none;
 }
 
+/* Proximas parcelas: boleto x cartao (Figma 8658:5183 / 8658:5239).
+   E um switch mais alto que o de credito/parcela: 56px e raio 40. */
+.proximas-parcelas {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.switch-parcelas {
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    height: 56px;
+    background-color: var(--color-bg-white);
+    border: 1px solid var(--color-border);
+    border-radius: 40px;
+}
+
+.switch-parcelas-btn {
+    flex: 1;
+    /* o -1px faz a borda do ativo cobrir a do grupo, sem crescer a altura */
+    margin: -1px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 500;
+    color: #525252;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.switch-parcelas-btn[aria-pressed="true"] {
+    background-color: #FEF2F2;
+    border-color: var(--color-primary);
+    border-radius: 40px;
+}
+
+.parcelas-boleto {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 32px 8px;
+    background-color: var(--color-bg-white);
+    border: 1px solid #E2E8F0;
+    border-radius: 6px;
+}
+
+.parcelas-boleto[hidden] { display: none; }
+
+.parcelas-boleto-texto,
+.parcelas-boleto-email {
+    margin: 0;
+    font-size: 16px;
+    line-height: 24px;
+    text-align: center;
+    color: #525252;
+}
+
+.parcelas-boleto-texto { font-weight: 500; }
+.parcelas-boleto-email { font-weight: 700; word-break: break-all; }
+
+#parcelasCartao[hidden] { display: none; }
+
 .btn-primary {
     height: 48px;
     background-color: var(--color-primary);
@@ -1289,6 +1359,24 @@ html.checkout-ativo .mobile-container {
     display: flex;
     flex-direction: column;
     gap: 16px;
+}
+
+/* Label a esquerda e link de apoio a direita, na mesma linha */
+.campo-cabecalho {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.campo-link {
+    flex: none;
+    font-size: 14px;
+    line-height: 1;
+    font-weight: 400;
+    text-align: right;
+    color: var(--color-text-light);
+    text-decoration: underline;
 }
 
 .checkout-aviso {

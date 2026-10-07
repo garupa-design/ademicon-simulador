@@ -561,7 +561,13 @@
             <section class="checkout-etapa" data-etapa="cep" data-rotulo="Passo 1 de 3: Endereço">
                 <h2 class="checkout-titulo">Agora vamos cadastrar seu endereço.</h2>
                 <div class="checkout-campo">
-                    <h3 class="checkout-label">Digite seu CEP</h3>
+                    <!-- O link fica na mesma linha do label, alinhado a direita (Figma 7081:7807) -->
+                    <div class="campo-cabecalho">
+                        <h3 class="checkout-label">Digite seu CEP</h3>
+                        <a class="campo-link" id="linkNaoSeiCep"
+                           href="https://buscacepinter.correios.com.br/app/endereco/index.php"
+                           target="_blank" rel="noopener noreferrer">Não sei meu CEP</a>
+                    </div>
                     <div class="input-wrapper" id="cepWrapper">
                         <input type="text" class="input-field" id="checkoutCep" data-autofoco placeholder="00000-000"
                                inputmode="numeric" maxlength="9" enterkeyhint="next" aria-describedby="cepInvalido">
@@ -635,6 +641,75 @@
                             <span class="radio-marca"></span>
                             <span class="radio-texto">Cartão de Crédito</span>
                         </label>
+                    </div>
+
+                    <!-- Proximas parcelas (Figma 8658:5183 boleto / 8658:5239 cartao).
+                         Mora dentro do mesmo container do radio: 16px de distancia. -->
+                    <div class="proximas-parcelas">
+                        <h3 class="checkout-label">Como você quer pagar as próximas parcelas?</h3>
+
+                        <div class="switch-parcelas" role="group" aria-label="Pagamento das próximas parcelas">
+                            <button type="button" class="switch-parcelas-btn" id="btnProximasBoleto"
+                                    data-modo="Boleto" aria-pressed="true">Boleto</button>
+                            <button type="button" class="switch-parcelas-btn" id="btnProximasCartao"
+                                    data-modo="Cartão de Crédito" aria-pressed="false">Cartão de Crédito</button>
+                        </div>
+
+                        <div class="parcelas-boleto" id="parcelasBoleto">
+                            <p class="parcelas-boleto-texto">O boleto será enviado para o e-mail</p>
+                            <p class="parcelas-boleto-email" id="parcelasEmail">emaildocliente@email.com</p>
+                        </div>
+
+                        <div class="cartao-campos" id="parcelasCartao" hidden>
+                            <div class="checkout-campo">
+                                <label class="form-label" for="parcelasNumero">Número</label>
+                                <div class="input-wrapper" id="parcelasNumeroWrapper">
+                                    <input type="text" class="input-field" id="parcelasNumero" aria-describedby="parcelasNumeroErro"
+                                           placeholder="0000 0000 0000 0000" inputmode="numeric"
+                                           autocomplete="cc-number" maxlength="19">
+                                </div>
+                                <p class="campo-erro-msg" id="parcelasNumeroErro" role="alert" hidden>Número do cartão inválido</p>
+                            </div>
+
+                            <div class="cartao-dupla">
+                                <div class="checkout-campo">
+                                    <label class="form-label" for="parcelasVencimento">Vencimento</label>
+                                    <div class="input-wrapper" id="parcelasVencWrapper">
+                                        <input type="text" class="input-field" id="parcelasVencimento" aria-describedby="parcelasVencErro"
+                                               placeholder="00/00" inputmode="numeric"
+                                               autocomplete="cc-exp" maxlength="5">
+                                    </div>
+                                    <p class="campo-erro-msg" id="parcelasVencErro" role="alert" hidden>Vencimento inválido</p>
+                                </div>
+                                <div class="checkout-campo">
+                                    <label class="form-label" for="parcelasCvc">CVC</label>
+                                    <div class="input-wrapper" id="parcelasCvcWrapper">
+                                        <input type="text" class="input-field" id="parcelasCvc" aria-describedby="parcelasCvcErro"
+                                               placeholder="000" inputmode="numeric"
+                                               autocomplete="cc-csc" maxlength="4">
+                                    </div>
+                                    <p class="campo-erro-msg" id="parcelasCvcErro" role="alert" hidden>CVC inválido</p>
+                                </div>
+                            </div>
+
+                            <div class="checkout-campo">
+                                <label class="form-label" for="parcelasNome">Nome do Titular</label>
+                                <div class="input-wrapper" id="parcelasNomeWrapper">
+                                    <input type="text" class="input-field" id="parcelasNome" aria-describedby="parcelasNomeErro"
+                                           placeholder="Ex: João C Silva" autocomplete="cc-name">
+                                </div>
+                                <p class="campo-erro-msg" id="parcelasNomeErro" role="alert" hidden>Digite o nome como está no cartão</p>
+                            </div>
+
+                            <div class="checkout-campo">
+                                <label class="form-label" for="parcelasCpf">CPF</label>
+                                <div class="input-wrapper" id="parcelasCpfWrapper">
+                                    <input type="text" class="input-field" id="parcelasCpf" aria-describedby="parcelasCpfErro"
+                                           placeholder="000.000.000-00" inputmode="numeric" maxlength="14">
+                                </div>
+                                <p class="campo-erro-msg" id="parcelasCpfErro" role="alert" hidden>CPF inválido</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -723,7 +798,8 @@
                         <span class="pix-acao-texto">Copiar código</span>
                     </button>
 
-                    <p class="pix-nota">Os boletos das próximas parcelas serão enviados para o seu e-mail.</p>
+                    <!-- O texto acompanha a escolha feita na tela de pagamento -->
+                    <p class="pix-nota" id="pixNotaParcelas">Os boletos das próximas parcelas serão enviados para o seu e-mail.</p>
                     <button type="button" class="pix-link" id="btnJaPaguei">Já paguei!</button>
                     <button type="button" class="pix-link" id="btnExpiraEm">Seu código expira em <span id="pixRelogio">01:59:59</span></button>
                 </div>
@@ -904,6 +980,6 @@
     </main>
 
 </div>
-    <script src="script.js?v=1788447000000"></script>
+    <script src="script.js?v=1791320000000"></script>
     </body>
 </html>
